@@ -11,6 +11,7 @@ class VideoDataModel extends VideoData {
     required super.music,
     required super.playCount,
     required super.downloadCount,
+    super.authorName,
   });
 
   factory VideoDataModel.fromJson(Map<String, dynamic> json) {
@@ -24,6 +25,7 @@ class VideoDataModel extends VideoData {
       music: json["music"],
       playCount: json["play_count"],
       downloadCount: json["download_count"],
+      authorName: json["author"] != null ? json["author"]["nickname"] : null,
     );
   }
 }

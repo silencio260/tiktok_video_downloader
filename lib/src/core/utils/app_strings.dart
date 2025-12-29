@@ -1,7 +1,7 @@
 class AppStrings {
   static const String appName = "Tiktok downloader";
   static const String videoLink = "Video link";
-  static const String inputLinkFieldText = "paste video link here";
+  static const String inputLinkFieldText = "Paste link here...";
   static const String download = "Download";
   static const String downloading = "Downloading";
   static const String downloads = "Downloads";

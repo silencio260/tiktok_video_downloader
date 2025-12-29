@@ -10,6 +10,7 @@ class VideoData extends Equatable {
   final String music;
   final int playCount;
   final int downloadCount;
+  final String? authorName;
 
   const VideoData({
     required this.id,
@@ -21,18 +22,20 @@ class VideoData extends Equatable {
     required this.music,
     required this.playCount,
     required this.downloadCount,
+    this.authorName,
   });
 
   @override
-  List<Object> get props => [
-        id,
-        duration,
-        title,
-        originCover,
-        playVideo,
-        wmPlayVideo,
-        music,
-        playCount,
-        downloadCount,
-      ];
+  List<Object?> get props => [
+    id,
+    duration,
+    title,
+    originCover,
+    playVideo,
+    wmPlayVideo,
+    music,
+    playCount,
+    downloadCount,
+    authorName,
+  ];
 }

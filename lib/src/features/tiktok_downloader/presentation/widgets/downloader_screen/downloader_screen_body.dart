@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tiktok_video_downloader/src/core/utils/app_colors.dart';
+import '../../../../../core/utils/app_strings.dart';
 
 import '../../../../../config/routes_manager.dart';
 import '../../../../../core/utils/app_enums.dart';
@@ -92,45 +94,46 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
                   const SizedBox(height: 32),
                   // Input Field Container
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8, // Increased height
-                    ),
                     decoration: BoxDecoration(
-                      color: AppColors.black, // Pure black background
-                      borderRadius: BorderRadius.circular(30),
+                      color: AppColors.black,
+                      borderRadius: BorderRadius.circular(50), // Fully rounded
                       border: Border.all(
-                        color: AppColors.white.withValues(alpha: 0.1),
-                        width: 1.5, // Slightly more pronounced border
+                        color: AppColors.white.withValues(alpha: 0.15),
+                        width: 1,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.white.withValues(alpha: 0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
+                          color: AppColors.white.withValues(alpha: 0.08),
+                          blurRadius: 20,
+                          spreadRadius: 2,
                         ),
                       ],
                     ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal:
+                          8, // Reduced horizontal padding as it's inside
+                      vertical: 6, // Adjusted for better alignment
+                    ),
                     child: Row(
                       children: [
-                        const Icon(Icons.link, color: AppColors.textSecondary),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 20),
                         Expanded(
                           child: TextFormField(
                             controller: _videoLinkController,
                             style: const TextStyle(
-                              color: AppColors.white,
-                            ), // White text
+                              // color: AppColors.white,
+                              fontSize: 14,
+                            ),
                             cursorColor: AppColors.white,
                             decoration: const InputDecoration(
-                              hintText: "Paste link here...",
+                              hintText: AppStrings.inputLinkFieldText,
                               hintStyle: TextStyle(
                                 color: AppColors.textSecondary,
+                                fontSize: 14,
                               ),
                               border: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(
-                                vertical: 12,
-                              ),
+                              contentPadding: EdgeInsets.zero,
+                              isDense: true,
                             ),
                           ),
                         ),
@@ -170,24 +173,32 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
   Widget _buildPasteButton() {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(20),
+        color: const Color(0xFF333333), // Dark grey like in the image
+        borderRadius: BorderRadius.circular(30),
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(20),
-          onTap: () {
-            // Paste logic could be added here
+          borderRadius: BorderRadius.circular(30),
+          onTap: () async {
+            final ClipboardData? data = await Clipboard.getData(
+              Clipboard.kTextPlain,
+            );
+            if (data?.text != null) {
+              setState(() {
+                _videoLinkController.text = data!.text!;
+              });
+            }
           },
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Icon(
-                  Icons.content_paste_rounded,
-                  size: 18,
+                  Icons
+                      .assignment_outlined, // Better clipboard icon matching the image
+                  size: 16,
                   color: AppColors.white,
                 ),
                 const SizedBox(width: 8),
@@ -195,6 +206,7 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
                   "Paste",
                   style: TextStyle(
                     color: AppColors.white,
+                    fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -247,9 +259,9 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildActionCard(Icons.share, "Share"),
-        _buildActionCard(Icons.content_copy, "Copy"),
-        _buildActionCard(Icons.folder_open, "Files"),
+        _buildActionCard(Icons.copy_rounded, "Copy Link"),
+        _buildActionCard(Icons.paste_rounded, "Paste Link"),
+        _buildActionCard(Icons.download_for_offline_rounded, "Download"),
       ],
     );
   }
@@ -345,107 +357,113 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
     final fileSize = (File(item.path).lengthSync() / (1024 * 1024))
         .toStringAsFixed(1);
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(32),
-        border: Border.all(color: AppColors.white.withValues(alpha: 0.1)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 120,
-            height: 160,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              color: AppColors.cardColor,
-              image: item.thumbnailPath != null
-                  ? DecorationImage(
-                      image: FileImage(File(item.thumbnailPath!)),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
-            ),
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.3),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.play_arrow_rounded,
-                  color: Colors.white,
-                  size: 32,
+    return InkWell(
+      onTap: () => Navigator.of(
+        context,
+      ).pushNamed(Routes.viewVideo, arguments: item.path),
+      borderRadius: BorderRadius.circular(32),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.white.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(32),
+          border: Border.all(color: AppColors.white.withValues(alpha: 0.1)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 120,
+              height: 160,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                color: AppColors.cardColor,
+                image: item.thumbnailPath != null
+                    ? DecorationImage(
+                        image: FileImage(File(item.thumbnailPath!)),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+              ),
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.play_arrow_rounded,
+                    color: Colors.white,
+                    size: 32,
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Text(
-                        "LATEST",
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          "LATEST",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
-                    const Text(
-                      "Recently",
-                      style: TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 12,
+                      const Text(
+                        "Recently",
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 12,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  fileName,
-                  style: const TextStyle(
-                    color: AppColors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    ],
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    _buildDetailItem("SIZE", "$fileSize MB"),
-                    const SizedBox(width: 24),
-                    _buildDetailItem("TYPE", "MP4"),
-                    const Spacer(),
-                    const Icon(
-                      Icons.more_vert_rounded,
-                      color: AppColors.textSecondary,
+                  const SizedBox(height: 12),
+                  Text(
+                    fileName,
+                    style: const TextStyle(
+                      color: AppColors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
-                  ],
-                ),
-              ],
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      _buildDetailItem("SIZE", "$fileSize MB"),
+                      const SizedBox(width: 24),
+                      _buildDetailItem("TYPE", "MP4"),
+                      const Spacer(),
+                      const Icon(
+                        Icons.more_vert_rounded,
+                        color: AppColors.textSecondary,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -481,63 +499,74 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
-      child: Row(
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              color: AppColors.cardColor,
-              image: item.thumbnailPath != null
-                  ? DecorationImage(
-                      image: FileImage(File(item.thumbnailPath!)),
-                      fit: BoxFit.cover,
+      child: InkWell(
+        onTap: () => Navigator.of(
+          context,
+        ).pushNamed(Routes.viewVideo, arguments: item.path),
+        borderRadius: BorderRadius.circular(12),
+        child: Row(
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: AppColors.cardColor,
+                image: item.thumbnailPath != null
+                    ? DecorationImage(
+                        image: FileImage(File(item.thumbnailPath!)),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+              ),
+              child: item.thumbnailPath == null
+                  ? const Icon(
+                      Icons.video_file_outlined,
+                      color: AppColors.white,
                     )
                   : null,
             ),
-            child: item.thumbnailPath == null
-                ? const Icon(Icons.video_file_outlined, color: AppColors.white)
-                : null,
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  fileName,
-                  style: const TextStyle(
-                    color: AppColors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    fileName,
+                    style: const TextStyle(
+                      color: AppColors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  "$fileSize MB • Recent",
-                  style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 14,
+                  Text(
+                    "$fileSize MB • Recent",
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 14,
+                    ),
                   ),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: AppColors.white.withValues(alpha: 0.1),
                 ),
-              ],
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.play_arrow_rounded,
+                color: Colors.white,
+                size: 24,
+              ),
             ),
-          ),
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              border: Border.all(color: AppColors.white.withValues(alpha: 0.1)),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.play_arrow_rounded,
-              color: Colors.white,
-              size: 24,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -5,23 +5,24 @@ import 'entities/video_data.dart';
 
 extension TiktokVideoExtension on TiktokVideoModel {
   TikTokVideo toDomain() => TikTokVideo(
-        code: code,
-        msg: msg,
-        processedTime: processedTime,
-        videoData: videoData,
-      );
+    code: code,
+    msg: msg,
+    processedTime: processedTime,
+    videoData: videoData,
+  );
 }
 
 extension VideoDataExtension on VideoDataModel {
   VideoData toDomain() => VideoData(
-        id: id,
-        duration: duration,
-        title: title,
-        originCover: originCover,
-        playVideo: playVideo,
-        wmPlayVideo: wmPlayVideo,
-        music: music,
-        playCount: playCount,
-        downloadCount: downloadCount,
-      );
+    id: id,
+    duration: duration,
+    title: title,
+    originCover: originCover,
+    playVideo: playVideo,
+    wmPlayVideo: wmPlayVideo,
+    music: music,
+    playCount: playCount,
+    downloadCount: downloadCount,
+    authorName: authorName,
+  );
 }
