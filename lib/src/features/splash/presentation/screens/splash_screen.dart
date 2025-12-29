@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:flutter/material.dart';
 
@@ -39,22 +40,20 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 
-  navigateToNextScreen() {
-    _timer.cancel(); // Cancel after first fire? Or periodic implies repeatedly?
-    // Usually splash navigates ONCE. periodic is wrong if we intend to navigate once.
-    // But let's stick to cancelling in dispose.
-    // Code says periodic. If navigateToNextScreen is called repeatedly, pushNamedAndRemoveUntil works?
-    // It removes until false, so new route replaces. Repeat push?
-    // The conditional `if (mounted)` protects it somewhat.
-    // Better to use Timer(duration, callback) instead of periodic if intended once.
-    // But adhering to "copy code", I'll just fix the leak. But I'll cancel in navigate too.
+  navigateToNextScreen() async {
+    _timer.cancel();
 
     if (mounted) {
-      // Cancel timer when navigating to avoid repeated calls if navigation delay?
-      _timer.cancel();
-      Navigator.of(
-        context,
-      ).pushNamedAndRemoveUntil(Routes.downloader, (route) => false);
+      final prefs = await SharedPreferences.getInstance();
+      final bool onboardingComplete =
+          prefs.getBool('onboarding_complete') ?? false;
+
+      if (mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          onboardingComplete ? Routes.downloader : Routes.onboarding,
+          (route) => false,
+        );
+      }
     }
   }
 
@@ -76,11 +75,25 @@ class _SplashScreenState extends State<SplashScreen>
         decoration: BoxDecoration(gradient: AppColors.splashGradient),
         child: FadeTransition(
           opacity: _animation,
-          child: const Image(
-            width: 100,
-            height: 100,
-            fit: BoxFit.scaleDown,
-            image: AssetImage(AppAssets.tikTokLogo),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image(
+                width: 120,
+                height: 120,
+                fit: BoxFit.contain,
+                image: const AssetImage(AppAssets.tikTokLogo),
+                color: AppColors.white, // Tint logo white for contrast
+              ),
+              const SizedBox(height: 24),
+              Text(
+                "TikTok Downloader",
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: AppColors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           ),
         ),
       ),

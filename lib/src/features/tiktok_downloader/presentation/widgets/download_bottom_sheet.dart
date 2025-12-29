@@ -16,27 +16,31 @@ Future<dynamic> buildDownloadBottomSheet(
   final VideoData videoData = tikTokVideo.videoData!;
   return showModalBottomSheet(
     context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
     builder: (_) {
-      return Container(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            BottomSheetHeader(videoData: videoData),
-            const SizedBox(height: 10),
-            BottomSheetCountItems(videoData: videoData),
-            const SizedBox(height: 10),
-            CustomElevatedBtn(
-              width: double.infinity,
-              label: AppStrings.download,
-              onPressed: () {
-                context
-                    .read<DownloaderBloc>()
-                    .add(DownloaderSaveVideo(tikTokVideo: tikTokVideo));
-              },
-            ),
-          ],
+      return SafeArea(
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              BottomSheetHeader(videoData: videoData),
+              const SizedBox(height: 10),
+              BottomSheetCountItems(videoData: videoData),
+              const SizedBox(height: 10),
+              CustomElevatedBtn(
+                width: double.infinity,
+                label: AppStrings.download,
+                onPressed: () {
+                  context.read<DownloaderBloc>().add(
+                    DownloaderSaveVideo(tikTokVideo: tikTokVideo),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       );
     },

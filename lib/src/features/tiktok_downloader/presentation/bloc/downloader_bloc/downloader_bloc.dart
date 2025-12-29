@@ -130,6 +130,12 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
     final path = await DirHelper.getAppPath();
     final directory = Directory(path);
     final files = await directory.list().toList();
+
+    // Sort files by modified date descending
+    files.sort(
+      (a, b) => b.statSync().modified.compareTo(a.statSync().modified),
+    );
+
     final newDownloadedVideosPaths = newDownloads.map((e) => e.path);
     for (final file in files) {
       if (file is File && file.path.endsWith('.mp4')) {
@@ -141,8 +147,9 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
           imageFormat: ImageFormat.PNG,
           quality: 30,
         );
-        oldDownloads
-            .add(VideoItem(path: videoPath)..thumbnailPath = thumbnailPath);
+        oldDownloads.add(
+          VideoItem(path: videoPath)..thumbnailPath = thumbnailPath,
+        );
       }
     }
     emit(OldDownloadsLoadingSuccess(downloads: oldDownloads));

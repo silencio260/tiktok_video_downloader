@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../../../../../config/routes_manager.dart';
-import '../../../../../core/utils/app_assets.dart';
 import '../../../../../core/utils/app_colors.dart';
 import '../../../../../core/utils/app_strings.dart';
-import '../../bloc/downloader_bloc/downloader_bloc.dart';
 
 class DownloaderScreenAppBar extends StatelessWidget
     implements PreferredSizeWidget {
@@ -14,47 +10,30 @@ class DownloaderScreenAppBar extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: const Text(AppStrings.appName),
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      centerTitle: true,
+      leading: IconButton(
+        icon: const Icon(Icons.settings_outlined, color: AppColors.white),
+        onPressed: () {
+          // Add settings logic
+        },
+      ),
+      title: Text(
+        AppStrings.appName,
+        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+          color: AppColors.white,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
       actions: [
-        BlocBuilder<DownloaderBloc, DownloaderState>(
-          builder: (context, state) {
-            final allDownloads = context.read<DownloaderBloc>().newDownloads;
-
-            return ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pushNamed(Routes.downloads);
-              },
-              child: allDownloads.isNotEmpty
-                  ? Stack(
-                      alignment: Alignment.topLeft,
-                      children: [
-                        _buildDownloadsIcons(),
-                        CircleAvatar(
-                          backgroundColor: AppColors.primaryColor,
-                          radius: 10,
-                          child: Text(
-                            allDownloads.length.toString(),
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium!
-                                .copyWith(color: AppColors.white),
-                          ),
-                        ),
-                      ],
-                    )
-                  : _buildDownloadsIcons(),
-            );
+        IconButton(
+          icon: const Icon(Icons.history_rounded, color: AppColors.white),
+          onPressed: () {
+            Navigator.of(context).pushNamed(Routes.downloads);
           },
         ),
       ],
-    );
-  }
-
-  Image _buildDownloadsIcons() {
-    return const Image(
-      width: 40,
-      height: 40,
-      image: AssetImage(AppAssets.downloadsIcon),
     );
   }
 
