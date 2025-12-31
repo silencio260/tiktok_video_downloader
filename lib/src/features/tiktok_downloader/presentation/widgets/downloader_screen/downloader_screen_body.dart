@@ -120,9 +120,12 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
                         Expanded(
                           child: TextFormField(
                             controller: _videoLinkController,
+                            autocorrect: false,
+                            enableSuggestions: false,
                             style: const TextStyle(
                               color: AppColors.white,
                               fontSize: 16,
+                              decoration: TextDecoration.none,
                             ),
                             cursorColor: AppColors.white,
                             decoration: const InputDecoration(
@@ -130,6 +133,7 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
                               hintStyle: TextStyle(
                                 color: AppColors.textSecondary,
                                 fontSize: 16,
+                                decoration: TextDecoration.none,
                               ),
                               // Remove all borders
                               border: InputBorder.none,

@@ -43,30 +43,57 @@ class _DownloadsScreenBodyState extends State<DownloadsScreenBody> {
 
   Widget _buildSearchBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(16),
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF1C1C1E), // Dark grey for search
-          borderRadius: BorderRadius.circular(12),
+          color: AppColors.cardColor.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(50),
+          border: Border.all(
+            color: AppColors.white.withOpacity(0.15),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.white.withOpacity(0.05),
+              blurRadius: 10,
+              spreadRadius: 1,
+            ),
+          ],
         ),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         child: TextField(
           controller: _searchController,
+          autocorrect: false,
+          enableSuggestions: false,
           onChanged: (value) {
             setState(() {
               _searchQuery = value;
             });
           },
-          style: const TextStyle(color: Colors.white),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            decoration: TextDecoration.none,
+          ),
           decoration: const InputDecoration(
             hintText: "Search saved videos",
-            hintStyle: TextStyle(color: AppColors.textSecondary, fontSize: 16),
+            hintStyle: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 16,
+              decoration: TextDecoration.none,
+            ),
             prefixIcon: Icon(
               Icons.search,
               color: AppColors.textSecondary,
               size: 24,
             ),
             border: InputBorder.none,
-            contentPadding: EdgeInsets.symmetric(vertical: 12),
+            enabledBorder: InputBorder.none,
+            focusedBorder: InputBorder.none,
+            isDense: true,
+            filled: true,
+            fillColor: Colors.transparent,
+            contentPadding: EdgeInsets.symmetric(vertical: 14),
           ),
         ),
       ),
@@ -95,12 +122,12 @@ class _DownloadsScreenBodyState extends State<DownloadsScreenBody> {
 
   Widget _buildDownloadsList(List<VideoItem> items) {
     return GridView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
-        childAspectRatio: 0.7, // Vertical orientation
+        childAspectRatio: 0.56, // Accurate 9:16 vertical aspect ratio
       ),
       itemCount: items.length,
       itemBuilder: (context, index) {

@@ -22,12 +22,18 @@ class VideoPlayerViewState extends State<VideoPlayerView> {
   @override
   void initState() {
     super.initState();
-    _videoPlayerController = VideoPlayerController.file(File(widget.videoPath));
+    _videoPlayerController = VideoPlayerController.file(File(widget.videoPath))
+      ..initialize().then((_) {
+        setState(() {}); // Refresh to show video with correct aspect ratio
+      });
     _chewieController = ChewieController(
       videoPlayerController: _videoPlayerController,
       autoPlay: true,
       looping: true,
       allowFullScreen: true,
+      aspectRatio: _videoPlayerController.value.isInitialized
+          ? _videoPlayerController.value.aspectRatio
+          : null,
     );
   }
 
@@ -42,32 +48,31 @@ class VideoPlayerViewState extends State<VideoPlayerView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.black,
-      body: RotatedBox(
-        quarterTurns: _isFullScreen ? 1 : 0,
-        child: Center(
-          child: Stack(
-            children: [
-              Chewie(
-                controller: _chewieController,
-              ),
-              Positioned(
-                top: 35,
-                left: 10,
-                child: InkWell(
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                  child: const CircleAvatar(
-                    backgroundColor: AppColors.grey,
-                    child: Icon(
-                      Icons.close,
-                      color: AppColors.black,
-                    ),
-                  ),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            Center(
+              child: _videoPlayerController.value.isInitialized
+                  ? AspectRatio(
+                      aspectRatio: _videoPlayerController.value.aspectRatio,
+                      child: Chewie(controller: _chewieController),
+                    )
+                  : const CircularProgressIndicator(color: AppColors.white),
+            ),
+            Positioned(
+              top: 20,
+              left: 20,
+              child: InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: CircleAvatar(
+                  backgroundColor: AppColors.grey.withOpacity(0.5),
+                  child: const Icon(Icons.close, color: AppColors.white),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

@@ -29,7 +29,7 @@ class DownloadsScreen extends StatelessWidget {
           const SizedBox(width: 8),
         ],
       ),
-      body: const DownloadsScreenBody(),
+      body: const SafeArea(child: DownloadsScreenBody()),
     );
   }
 }
