@@ -131,7 +131,13 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
                                 color: AppColors.textSecondary,
                                 fontSize: 16,
                               ),
+                              // Remove all borders
                               border: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              errorBorder: InputBorder.none,
+                              disabledBorder: InputBorder.none,
+
                               contentPadding: EdgeInsets.zero,
                               isDense: true,
                               filled: true,
