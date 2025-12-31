@@ -30,7 +30,7 @@ class DownloaderBodyInputField extends StatelessWidget {
           ),
         ],
       ),
-      // padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       child: Form(
         key: formKey,
         child: Row(
@@ -40,7 +40,7 @@ class DownloaderBodyInputField extends StatelessWidget {
               child: TextFormField(
                 controller: videoLinkController,
                 keyboardType: TextInputType.url,
-                style: const TextStyle(color: AppColors.white, fontSize: 14),
+                style: const TextStyle(color: AppColors.white, fontSize: 16),
                 cursorColor: AppColors.white,
                 validator: (String? value) {
                   if (value!.isEmpty) return AppStrings.videoLinkRequired;
@@ -50,11 +50,13 @@ class DownloaderBodyInputField extends StatelessWidget {
                   hintText: AppStrings.inputLinkFieldText,
                   hintStyle: TextStyle(
                     color: AppColors.textSecondary,
-                    fontSize: 14,
+                    fontSize: 16,
                   ),
                   border: InputBorder.none,
                   contentPadding: EdgeInsets.zero,
                   isDense: true,
+                  filled: true,
+                  fillColor: Colors.transparent,
                 ),
               ),
             ),

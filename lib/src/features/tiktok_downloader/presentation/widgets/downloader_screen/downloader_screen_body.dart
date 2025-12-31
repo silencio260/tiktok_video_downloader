@@ -95,15 +95,15 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
                   // Input Field Container
                   Container(
                     decoration: BoxDecoration(
-                      color: AppColors.black,
+                      color: AppColors.cardColor.withOpacity(0.5),
                       borderRadius: BorderRadius.circular(50), // Fully rounded
                       border: Border.all(
-                        color: AppColors.white.withValues(alpha: 0.15),
+                        color: AppColors.white.withOpacity(0.15),
                         width: 1,
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.white.withValues(alpha: 0.08),
+                          color: AppColors.white.withOpacity(0.08),
                           blurRadius: 20,
                           spreadRadius: 2,
                         ),
@@ -112,7 +112,7 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
                     padding: const EdgeInsets.symmetric(
                       horizontal:
                           8, // Reduced horizontal padding as it's inside
-                      vertical: 6, // Adjusted for better alignment
+                      vertical: 8, // Adjusted for better alignment
                     ),
                     child: Row(
                       children: [
@@ -121,19 +121,21 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
                           child: TextFormField(
                             controller: _videoLinkController,
                             style: const TextStyle(
-                              // color: AppColors.white,
-                              fontSize: 14,
+                              color: AppColors.white,
+                              fontSize: 16,
                             ),
                             cursorColor: AppColors.white,
                             decoration: const InputDecoration(
                               hintText: AppStrings.inputLinkFieldText,
                               hintStyle: TextStyle(
                                 color: AppColors.textSecondary,
-                                fontSize: 14,
+                                fontSize: 16,
                               ),
                               border: InputBorder.none,
                               contentPadding: EdgeInsets.zero,
                               isDense: true,
+                              filled: true,
+                              fillColor: Colors.transparent,
                             ),
                           ),
                         ),
@@ -191,14 +193,14 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
             }
           },
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Icon(
                   Icons
                       .assignment_outlined, // Better clipboard icon matching the image
-                  size: 16,
+                  size: 18,
                   color: AppColors.white,
                 ),
                 const SizedBox(width: 8),
@@ -206,7 +208,7 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
                   "Paste",
                   style: TextStyle(
                     color: AppColors.white,
-                    fontSize: 13,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -271,9 +273,9 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
       width: 100,
       height: 100,
       decoration: BoxDecoration(
-        color: AppColors.white.withValues(alpha: 0.05),
+        color: AppColors.cardColor,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.white.withValues(alpha: 0.1)),
+        border: Border.all(color: AppColors.white.withOpacity(0.1)),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -366,9 +368,9 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.white.withValues(alpha: 0.05),
+          color: AppColors.cardColor,
           borderRadius: BorderRadius.circular(32),
-          border: Border.all(color: AppColors.white.withValues(alpha: 0.1)),
+          border: Border.all(color: AppColors.white.withOpacity(0.1)),
         ),
         child: Row(
           children: [
@@ -389,7 +391,7 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.3),
+                    color: Colors.black.withOpacity(0.3),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -554,9 +556,7 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                border: Border.all(
-                  color: AppColors.white.withValues(alpha: 0.1),
-                ),
+                border: Border.all(color: AppColors.white.withOpacity(0.1)),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
