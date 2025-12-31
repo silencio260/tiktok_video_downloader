@@ -11,28 +11,25 @@ class DownloadsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.black,
       appBar: AppBar(
-        title: const Text("My Downloads"),
-        centerTitle: true,
+        title: const Text(
+          "Downloads",
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+        centerTitle: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
           TextButton(
             onPressed: () {},
             child: const Text(
-              "Select",
-              style: TextStyle(color: AppColors.textSecondary),
+              "Edit",
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
             ),
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: const DownloadsScreenBody(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () =>
-            Navigator.of(context).pop(), // Go back to home/downloader
-        backgroundColor: const Color(0xFF2D68FF),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: const Icon(Icons.add, color: Colors.white, size: 32),
-      ),
     );
   }
 }
