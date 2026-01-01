@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 
 import '../../../../config/routes_manager.dart';
 import '../../../../core/media_query.dart';
-import '../../../../core/utils/app_assets.dart';
 import '../../../../core/utils/app_colors.dart';
 import '../../../../core/utils/app_constants.dart';
+import '../../../../core/utils/app_strings.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -78,16 +78,25 @@ class _SplashScreenState extends State<SplashScreen>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image(
-                width: 120,
-                height: 120,
-                fit: BoxFit.contain,
-                image: const AssetImage(AppAssets.tikTokLogo),
-                color: AppColors.white, // Tint logo white for contrast
+              Container(
+                width: 140,
+                height: 140,
+                decoration: BoxDecoration(
+                  color: AppColors.white.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(40),
+                  border: Border.all(color: AppColors.white.withOpacity(0.1)),
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.cloud_download_rounded,
+                    size: 80,
+                    color: AppColors.white,
+                  ),
+                ),
               ),
               const SizedBox(height: 24),
               Text(
-                "TikTok Downloader",
+                AppStrings.appName,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   color: AppColors.white,
                   fontWeight: FontWeight.bold,
