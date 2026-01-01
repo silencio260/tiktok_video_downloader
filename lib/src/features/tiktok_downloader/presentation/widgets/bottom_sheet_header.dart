@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../../../../core/utils/app_assets.dart';
+import '../../../../core/utils/app_colors.dart';
 import '../../domain/entities/video_data.dart';
 
 class BottomSheetHeader extends StatelessWidget {
@@ -14,30 +13,28 @@ class BottomSheetHeader extends StatelessWidget {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(10),
-          child: FadeInImage(
+          child: SizedBox(
             width: 150,
             height: 150,
-            fit: BoxFit.cover,
-            image: NetworkImage(videoData.originCover),
-            placeholder: const AssetImage(AppAssets.noInternetImage),
-            imageErrorBuilder: (context, error, stackTrace) => Container(
-              width: 150,
-              height: 150,
-              color: Colors.grey[900],
-              child: const Icon(
-                Icons.video_library,
-                color: Colors.white54,
-                size: 50,
-              ),
-            ),
-            placeholderErrorBuilder: (context, error, stackTrace) => Container(
-              width: 150,
-              height: 150,
-              color: Colors.grey[900],
-              child: const Icon(
-                Icons.video_library,
-                color: Colors.white54,
-                size: 50,
+            child: Image.network(
+              videoData.originCover,
+              fit: BoxFit.cover,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Container(
+                  color: Colors.grey[900],
+                  child: const Center(
+                    child: CircularProgressIndicator(color: AppColors.white),
+                  ),
+                );
+              },
+              errorBuilder: (context, error, stackTrace) => Container(
+                color: Colors.grey[900],
+                child: const Icon(
+                  Icons.video_library,
+                  color: Colors.white54,
+                  size: 50,
+                ),
               ),
             ),
           ),

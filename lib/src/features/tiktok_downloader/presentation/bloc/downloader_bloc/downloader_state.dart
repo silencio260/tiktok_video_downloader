@@ -41,6 +41,15 @@ class DownloaderSaveVideoLoading extends DownloaderState {
   List<Object?> get props => [];
 }
 
+class DownloaderSaveVideoProgress extends DownloaderState {
+  final int percent;
+
+  const DownloaderSaveVideoProgress(this.percent);
+
+  @override
+  List<Object?> get props => [percent];
+}
+
 class DownloaderSaveVideoSuccess extends DownloaderState {
   final String message;
   final String path;

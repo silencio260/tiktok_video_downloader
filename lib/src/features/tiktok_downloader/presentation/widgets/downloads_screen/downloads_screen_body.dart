@@ -18,6 +18,12 @@ class _DownloadsScreenBodyState extends State<DownloadsScreenBody> {
   String _searchQuery = "";
 
   @override
+  void initState() {
+    super.initState();
+    context.read<DownloaderBloc>().add(LoadOldDownloads());
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlocBuilder<DownloaderBloc, DownloaderState>(
       builder: (context, state) {

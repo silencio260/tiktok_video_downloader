@@ -29,7 +29,6 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
   void initState() {
     super.initState();
     _videoLinkController = TextEditingController();
-    context.read<DownloaderBloc>().add(LoadOldDownloads());
   }
 
   @override
@@ -44,27 +43,30 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
       listener: (context, state) {
         if (state is DownloaderSaveVideoLoading) {
           Navigator.of(context).pop(); // Just close the bottom sheet
-          buildToast(msg: "Download started...", type: ToastType.success);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Download started..."),
+              backgroundColor: AppColors.black,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
         }
         if (state is DownloaderGetVideoFailure) {
-          buildToast(msg: state.message, type: ToastType.error);
+          _showSnackBar(context, state.message, isError: true);
         }
         if (state is DownloaderGetVideoSuccess &&
             state.tikTokVideo.videoData == null) {
-          buildToast(msg: state.tikTokVideo.msg, type: ToastType.error);
+          _showSnackBar(context, state.tikTokVideo.msg, isError: true);
         }
         if (state is DownloaderGetVideoSuccess &&
             state.tikTokVideo.videoData != null) {
           buildDownloadBottomSheet(context, state.tikTokVideo);
         }
         if (state is DownloaderSaveVideoSuccess) {
-          buildToast(
-            msg: "Video downloaded successfully!",
-            type: ToastType.success,
-          );
+          _showSnackBar(context, "Video downloaded successfully!");
         }
         if (state is DownloaderSaveVideoFailure) {
-          buildToast(msg: state.message, type: ToastType.error);
+          _showSnackBar(context, state.message, isError: true);
         }
       },
       builder: (context, state) {
@@ -159,8 +161,13 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
                   ),
                   const SizedBox(height: 16),
                   state is DownloaderGetVideoLoading ||
-                          state is DownloaderSaveVideoLoading
-                      ? const CenterProgressIndicator()
+                          state is DownloaderSaveVideoLoading ||
+                          state is DownloaderSaveVideoProgress
+                      ? CenterProgressIndicator(
+                          percentage: state is DownloaderSaveVideoProgress
+                              ? state.percent
+                              : null,
+                        )
                       : _buildBodyDownloadBtn(context),
                   const SizedBox(height: 32),
                   Align(
@@ -427,6 +434,21 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showSnackBar(
+    BuildContext context,
+    String message, {
+    bool isError = false,
+  }) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: const TextStyle(color: Colors.white)),
+        backgroundColor: isError ? AppColors.error : AppColors.black,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }

@@ -26,3 +26,12 @@ class LoadOldDownloads extends DownloaderEvent {
   @override
   List<Object?> get props => [];
 }
+
+class DownloaderReportProgress extends DownloaderEvent {
+  final int percent;
+
+  const DownloaderReportProgress(this.percent);
+
+  @override
+  List<Object?> get props => [percent];
+}

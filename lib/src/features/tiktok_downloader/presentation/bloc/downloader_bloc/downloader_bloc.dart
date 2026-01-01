@@ -32,6 +32,10 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
     on<LoadOldDownloads>(_loadOldDownloads);
     on<DownloaderGetVideo>(_getVideo);
     on<DownloaderSaveVideo>(_saveVideo);
+    on<DownloaderReportProgress>(_onReportProgress);
+
+    // Initial load
+    add(LoadOldDownloads());
   }
 
   List<DownloadItem> newDownloads = [];
@@ -64,7 +68,20 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
       status: DownloadStatus.downloading,
       path: path,
     );
-    SaveVideoParams params = SaveVideoParams(savePath: path, videoLink: link);
+    int lastPercentage = -1;
+    SaveVideoParams params = SaveVideoParams(
+      savePath: path,
+      videoLink: link,
+      onProgress: (received, total) {
+        if (total != -1) {
+          final int percentage = ((received / total) * 100).floor();
+          if (percentage != lastPercentage) {
+            lastPercentage = percentage;
+            add(DownloaderReportProgress(percentage));
+          }
+        }
+      },
+    );
     int index = _checkIfItemIsExistInDownloads(item);
     _addItem(index, item);
     emit(const DownloaderSaveVideoLoading());
@@ -82,6 +99,13 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
         emit(DownloaderSaveVideoSuccess(message: right, path: path));
       },
     );
+  }
+
+  void _onReportProgress(
+    DownloaderReportProgress event,
+    Emitter<DownloaderState> emit,
+  ) {
+    emit(DownloaderSaveVideoProgress(event.percent));
   }
 
   String _processLink(String link) {
@@ -130,10 +154,18 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
     LoadOldDownloads event,
     Emitter<DownloaderState> emit,
   ) async {
-    emit(const OldDownloadsLoading());
-    oldDownloads.clear();
+    // Only emit loading if we don't have items yet to make it feel instant on return
+    if (oldDownloads.isEmpty) {
+      emit(const OldDownloadsLoading());
+    }
+
     final path = await DirHelper.getAppPath();
     final directory = Directory(path);
+    if (!await directory.exists()) {
+      emit(const OldDownloadsLoadingSuccess(downloads: []));
+      return;
+    }
+
     final files = await directory.list().toList();
 
     // Sort files by modified date descending
@@ -141,22 +173,24 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
       (a, b) => b.statSync().modified.compareTo(a.statSync().modified),
     );
 
-    final newDownloadedVideosPaths = newDownloads.map((e) => e.path);
+    final List<Future<VideoItem>> futures = [];
     for (final file in files) {
       if (file is File && file.path.endsWith('.mp4')) {
-        final videoPath = file.path;
-        if (newDownloadedVideosPaths.contains(videoPath)) continue;
-        final thumbnailPath = await VideoThumbnail.thumbnailFile(
-          video: videoPath,
-          thumbnailPath: (await getTemporaryDirectory()).path,
-          imageFormat: ImageFormat.PNG,
-          quality: 30,
-        );
-        oldDownloads.add(
-          VideoItem(path: videoPath)..thumbnailPath = thumbnailPath,
-        );
+        futures.add(_createVideoItem(file.path));
       }
     }
+
+    oldDownloads = await Future.wait(futures);
     emit(OldDownloadsLoadingSuccess(downloads: oldDownloads));
+  }
+
+  Future<VideoItem> _createVideoItem(String videoPath) async {
+    final thumbnailPath = await VideoThumbnail.thumbnailFile(
+      video: videoPath,
+      thumbnailPath: (await getTemporaryDirectory()).path,
+      imageFormat: ImageFormat.PNG,
+      quality: 30,
+    );
+    return VideoItem(path: videoPath)..thumbnailPath = thumbnailPath;
   }
 }

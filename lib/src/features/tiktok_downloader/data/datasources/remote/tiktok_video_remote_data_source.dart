@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import '../../../../../core/helpers/dio_helper.dart';
 import '../../../../../core/utils/app_constants.dart';
 import '../../../../../core/utils/app_strings.dart';
@@ -9,6 +10,7 @@ abstract class TiktokVideoBaseRemoteDataSource {
   Future<String> saveVideo({
     required String videoLink,
     required String savePath,
+    ProgressCallback? onReceiveProgress,
   });
 }
 
@@ -34,9 +36,14 @@ class TiktokVideoRemoteDataSource implements TiktokVideoBaseRemoteDataSource {
   Future<String> saveVideo({
     required String videoLink,
     required String savePath,
+    ProgressCallback? onReceiveProgress,
   }) async {
     try {
-      await dioHelper.download(savePath: savePath, downloadLink: videoLink);
+      await dioHelper.download(
+        savePath: savePath,
+        downloadLink: videoLink,
+        onReceiveProgress: onReceiveProgress,
+      );
       return AppStrings.downloadSuccess;
     } catch (error) {
       rethrow;
