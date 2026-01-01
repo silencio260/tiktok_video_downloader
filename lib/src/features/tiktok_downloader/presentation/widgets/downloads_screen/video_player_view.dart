@@ -23,30 +23,31 @@ class VideoPlayerViewState extends State<VideoPlayerView> {
     super.initState();
     _videoPlayerController = VideoPlayerController.file(File(widget.videoPath))
       ..initialize().then((_) {
-        setState(() {}); // Refresh to show video with correct aspect ratio
+        _chewieController = ChewieController(
+          videoPlayerController: _videoPlayerController,
+          autoPlay: true,
+          looping: true,
+          allowFullScreen: true,
+          allowPlaybackSpeedChanging: false,
+          aspectRatio: _videoPlayerController.value.aspectRatio,
+          showControls: true,
+          materialProgressColors: ChewieProgressColors(
+            playedColor: AppColors.pink,
+            handleColor: AppColors.pink,
+            backgroundColor: AppColors.grey.withOpacity(0.2),
+            bufferedColor: AppColors.grey.withOpacity(0.1),
+          ),
+        );
+        setState(() {}); // Refresh to show video
       });
-    _chewieController = ChewieController(
-      videoPlayerController: _videoPlayerController,
-      autoPlay: true,
-      looping: true,
-      allowFullScreen: true,
-      aspectRatio: _videoPlayerController.value.isInitialized
-          ? _videoPlayerController.value.aspectRatio
-          : null,
-      showControls: true,
-      materialProgressColors: ChewieProgressColors(
-        playedColor: AppColors.white,
-        handleColor: AppColors.white,
-        backgroundColor: AppColors.grey.withOpacity(0.5),
-        bufferedColor: AppColors.grey.withOpacity(0.3),
-      ),
-    );
   }
 
   @override
   void dispose() {
     _videoPlayerController.dispose();
-    _chewieController.dispose();
+    if (_videoPlayerController.value.isInitialized) {
+      _chewieController.dispose();
+    }
     super.dispose();
   }
 
@@ -75,21 +76,18 @@ class VideoPlayerViewState extends State<VideoPlayerView> {
                 children: [
                   InkWell(
                     onTap: () => Navigator.pop(context),
-                    child: CircleAvatar(
-                      backgroundColor: AppColors.black.withOpacity(0.5),
-                      child: const Icon(
-                        Icons.arrow_back,
-                        color: AppColors.white,
-                      ),
+                    child: const CircleAvatar(
+                      backgroundColor: AppColors.black,
+                      child: Icon(Icons.arrow_back, color: AppColors.white),
                     ),
                   ),
                   InkWell(
                     onTap: () {
                       Share.shareXFiles([XFile(widget.videoPath)]);
                     },
-                    child: CircleAvatar(
-                      backgroundColor: AppColors.black.withOpacity(0.5),
-                      child: const Icon(Icons.share, color: AppColors.white),
+                    child: const CircleAvatar(
+                      backgroundColor: AppColors.black,
+                      child: Icon(Icons.share, color: AppColors.white),
                     ),
                   ),
                 ],
