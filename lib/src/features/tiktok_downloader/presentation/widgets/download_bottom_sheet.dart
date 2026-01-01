@@ -7,7 +7,6 @@ import '../../domain/entities/tiktok_video.dart';
 import '../../domain/entities/video_data.dart';
 import '../bloc/downloader_bloc/downloader_bloc.dart';
 import 'bottom_sheet_header.dart';
-import 'downloader_screen/count_view.dart';
 
 Future<dynamic> buildDownloadBottomSheet(
   BuildContext context,
@@ -27,9 +26,7 @@ Future<dynamic> buildDownloadBottomSheet(
             mainAxisSize: MainAxisSize.min,
             children: [
               BottomSheetHeader(videoData: videoData),
-              const SizedBox(height: 10),
-              BottomSheetCountItems(videoData: videoData),
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
               CustomElevatedBtn(
                 width: double.infinity,
                 label: AppStrings.download,

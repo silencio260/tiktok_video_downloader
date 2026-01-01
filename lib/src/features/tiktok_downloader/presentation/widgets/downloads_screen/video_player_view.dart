@@ -1,8 +1,8 @@
 import 'dart:io';
-
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../../../core/utils/app_colors.dart';
 
@@ -17,7 +17,6 @@ class VideoPlayerView extends StatefulWidget {
 class VideoPlayerViewState extends State<VideoPlayerView> {
   late VideoPlayerController _videoPlayerController;
   late ChewieController _chewieController;
-  final bool _isFullScreen = false;
 
   @override
   void initState() {
@@ -34,6 +33,13 @@ class VideoPlayerViewState extends State<VideoPlayerView> {
       aspectRatio: _videoPlayerController.value.isInitialized
           ? _videoPlayerController.value.aspectRatio
           : null,
+      showControls: true,
+      materialProgressColors: ChewieProgressColors(
+        playedColor: AppColors.white,
+        handleColor: AppColors.white,
+        backgroundColor: AppColors.grey.withOpacity(0.5),
+        bufferedColor: AppColors.grey.withOpacity(0.3),
+      ),
     );
   }
 
@@ -59,17 +65,34 @@ class VideoPlayerViewState extends State<VideoPlayerView> {
                     )
                   : const CircularProgressIndicator(color: AppColors.white),
             ),
+            // Header Controls
             Positioned(
               top: 20,
               left: 20,
-              child: InkWell(
-                onTap: () {
-                  Navigator.pop(context);
-                },
-                child: CircleAvatar(
-                  backgroundColor: AppColors.grey.withOpacity(0.5),
-                  child: const Icon(Icons.close, color: AppColors.white),
-                ),
+              right: 20,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  InkWell(
+                    onTap: () => Navigator.pop(context),
+                    child: CircleAvatar(
+                      backgroundColor: AppColors.black.withOpacity(0.5),
+                      child: const Icon(
+                        Icons.arrow_back,
+                        color: AppColors.white,
+                      ),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      Share.shareXFiles([XFile(widget.videoPath)]);
+                    },
+                    child: CircleAvatar(
+                      backgroundColor: AppColors.black.withOpacity(0.5),
+                      child: const Icon(Icons.share, color: AppColors.white),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

@@ -43,7 +43,8 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
     return BlocConsumer<DownloaderBloc, DownloaderState>(
       listener: (context, state) {
         if (state is DownloaderSaveVideoLoading) {
-          Navigator.of(context).popAndPushNamed(Routes.downloads);
+          Navigator.of(context).pop(); // Just close the bottom sheet
+          buildToast(msg: "Download started...", type: ToastType.success);
         }
         if (state is DownloaderGetVideoFailure) {
           buildToast(msg: state.message, type: ToastType.error);
@@ -57,7 +58,10 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
           buildDownloadBottomSheet(context, state.tikTokVideo);
         }
         if (state is DownloaderSaveVideoSuccess) {
-          buildToast(msg: state.message, type: ToastType.success);
+          buildToast(
+            msg: "Video downloaded successfully!",
+            type: ToastType.success,
+          );
         }
         if (state is DownloaderSaveVideoFailure) {
           buildToast(msg: state.message, type: ToastType.error);
@@ -154,7 +158,8 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  state is DownloaderGetVideoLoading
+                  state is DownloaderGetVideoLoading ||
+                          state is DownloaderSaveVideoLoading
                       ? const CenterProgressIndicator()
                       : _buildBodyDownloadBtn(context),
                   const SizedBox(height: 32),

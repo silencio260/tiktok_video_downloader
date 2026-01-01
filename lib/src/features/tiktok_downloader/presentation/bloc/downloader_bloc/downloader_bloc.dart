@@ -78,6 +78,7 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
       (right) async {
         _updateItem(index, item.copyWith(status: DownloadStatus.success));
         await DirHelper.saveVideoToGallery(path);
+        add(LoadOldDownloads()); // Refresh the list
         emit(DownloaderSaveVideoSuccess(message: right, path: path));
       },
     );

@@ -20,6 +20,26 @@ class BottomSheetHeader extends StatelessWidget {
             fit: BoxFit.cover,
             image: NetworkImage(videoData.originCover),
             placeholder: const AssetImage(AppAssets.noInternetImage),
+            imageErrorBuilder: (context, error, stackTrace) => Container(
+              width: 150,
+              height: 150,
+              color: Colors.grey[900],
+              child: const Icon(
+                Icons.video_library,
+                color: Colors.white54,
+                size: 50,
+              ),
+            ),
+            placeholderErrorBuilder: (context, error, stackTrace) => Container(
+              width: 150,
+              height: 150,
+              color: Colors.grey[900],
+              child: const Icon(
+                Icons.video_library,
+                color: Colors.white54,
+                size: 50,
+              ),
+            ),
           ),
         ),
         const SizedBox(width: 10),
