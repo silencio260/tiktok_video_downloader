@@ -32,8 +32,8 @@ class VideoPlayerViewState extends State<VideoPlayerView> {
           aspectRatio: _videoPlayerController.value.aspectRatio,
           showControls: true,
           materialProgressColors: ChewieProgressColors(
-            playedColor: AppColors.pink,
-            handleColor: AppColors.pink,
+            playedColor: AppColors.black,
+            handleColor: AppColors.black,
             backgroundColor: AppColors.grey.withOpacity(0.2),
             bufferedColor: AppColors.grey.withOpacity(0.1),
           ),
