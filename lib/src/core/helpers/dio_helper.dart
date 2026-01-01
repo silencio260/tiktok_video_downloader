@@ -2,27 +2,24 @@ import 'package:dio/dio.dart';
 
 import '../../container_injector.dart';
 import '../api/interceptors.dart';
-import '../utils/app_constants.dart';
-
-const String _contentType = "Content-Type";
-const String _applicationJson = "application/json";
-const String _apiKey = "1e2d328129msha49fca00df6f881p147af8jsne121c53deae6";
-// const String _apiKey = "f21b4e327emsh7a30ad174abed5ep10e725jsn17d7586cf86b";
-const String _apiHost = "tiktok-download-without-watermark.p.rapidapi.com";
 
 class DioHelper {
   final Dio dio;
 
   DioHelper({required this.dio}) {
-    Map<String, dynamic> headers = {
-      _contentType: _applicationJson,
-      "X-RapidAPI-Key": _apiKey,
-      "X-RapidAPI-Host": _apiHost,
-    };
     dio.options = BaseOptions(
-      baseUrl: AppConstants.baseUrl,
       receiveDataWhenStatusError: true,
-      headers: headers,
+      headers: {
+        'User-Agent':
+            'Mozilla/5.0 (Linux; Android 10; SM-G981B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.162 Mobile Safari/537.36',
+        'Accept': '*/*',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Connection': 'keep-alive',
+        'Range': 'bytes=0-',
+        'Accept-Language': 'en-US,en;q=0.9',
+      },
+      connectTimeout: const Duration(seconds: 30),
+      receiveTimeout: const Duration(seconds: 30),
     );
     dio.interceptors.add(sl<LogInterceptor>());
     dio.interceptors.add(sl<AppInterceptors>());
@@ -41,10 +38,20 @@ class DioHelper {
     Map<String, dynamic>? queryParams,
     ProgressCallback? onReceiveProgress,
   }) async {
+    final bool isTikTokLink = downloadLink.contains('tiktok.com');
+
     return await dio.download(
       downloadLink,
       savePath,
       onReceiveProgress: onReceiveProgress,
+      options: Options(
+        headers: {
+          if (isTikTokLink) ...{
+            'Referer': 'https://www.tiktok.com/',
+            'Origin': 'https://www.tiktok.com',
+          },
+        },
+      ),
     );
   }
 }

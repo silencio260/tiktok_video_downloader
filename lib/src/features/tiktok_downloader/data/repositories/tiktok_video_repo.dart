@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
 
 import '../../../../core/error/error_handler.dart';
 import '../../../../core/error/failure.dart';
@@ -24,7 +23,7 @@ class TiktokVideoRepo implements TiktokVideoBaseRepo {
     try {
       final TiktokVideoModel video = await remoteDataSource.getVideo(videoLink);
       return Right(video.toDomain());
-    } on DioException catch (error) {
+    } catch (error) {
       return Left(ErrorHandler.handle(error).failure);
     }
   }
@@ -45,7 +44,7 @@ class TiktokVideoRepo implements TiktokVideoBaseRepo {
         onReceiveProgress: onProgress,
       );
       return Right(message);
-    } on DioException catch (error) {
+    } catch (error) {
       return Left(ErrorHandler.handle(error).failure);
     }
   }

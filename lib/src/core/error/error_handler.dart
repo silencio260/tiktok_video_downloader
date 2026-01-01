@@ -37,13 +37,26 @@ Failure _handleError(DioException dioError) {
 }
 
 Failure _handleResponseError(Response? response) {
+  String? message;
+  if (response?.data is Map) {
+    message = response?.data['message'];
+  } else if (response?.data is String &&
+      (response?.data as String).isNotEmpty) {
+    // If it's a string, it might be an HTML error but let's see
+  }
+
   switch (response?.statusCode) {
     case 400:
       return const BadRequestFailure();
     case 403:
-      return NotSubscribedFailure(message: response?.data['message']);
+      return NotSubscribedFailure(
+        message:
+            message ?? "Access denied (403). The video might be restricted.",
+      );
     case 429:
-      return TooManyRequestsFailure(message: response?.data['message']);
+      return TooManyRequestsFailure(
+        message: message ?? "Too many requests. Please try again later.",
+      );
     case 404:
       return const NotFoundFailure();
     case 500:

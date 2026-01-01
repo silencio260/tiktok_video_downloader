@@ -109,8 +109,8 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
   }
 
   String _processLink(String link) {
-    bool isCorrectLink = link.endsWith(".mp4");
-    if (!isCorrectLink) link += ".mp4";
+    // We should not append .mp4 manually as it can break URLs with query parameters
+    // and most TikTok CDN links already point to the video binary.
     return link;
   }
 

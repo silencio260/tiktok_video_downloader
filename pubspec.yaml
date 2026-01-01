@@ -49,6 +49,7 @@ dependencies:
   gal: ^2.3.2
   shared_preferences: ^2.5.4
   share_plus: ^12.0.1
+  tiktok_scraper: ^0.1.0
 
 dev_dependencies:
   flutter_test:
