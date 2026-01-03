@@ -15,11 +15,12 @@ class DioHelper {
         'Accept': '*/*',
         'Accept-Encoding': 'gzip, deflate, br',
         'Connection': 'keep-alive',
-        'Range': 'bytes=0-',
         'Accept-Language': 'en-US,en;q=0.9',
       },
       connectTimeout: const Duration(seconds: 30),
       receiveTimeout: const Duration(seconds: 30),
+      validateStatus:
+          (status) => status != null && status >= 200 && status < 300,
     );
     dio.interceptors.add(sl<LogInterceptor>());
     dio.interceptors.add(sl<AppInterceptors>());

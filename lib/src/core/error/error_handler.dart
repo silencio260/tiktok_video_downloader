@@ -62,6 +62,11 @@ Failure _handleResponseError(Response? response) {
     case 500:
       return const ServerFailure();
     default:
+      if (response?.statusCode != null &&
+          response!.statusCode! >= 200 &&
+          response.statusCode! < 300) {
+        return const UnexpectedFailure(); // Should not happen if validateStatus is correct
+      }
       return const UnexpectedFailure();
   }
 }

@@ -7,24 +7,18 @@ class DirHelper {
   static Future<String> getAppPath() async {
     String mainPath = await _getMainPath();
     String appPath = "$mainPath/TikTokVideos";
-    _createPathIfNotExist(appPath);
+    await _createPathIfNotExist(appPath);
     return appPath;
   }
 
   static Future<String> _getMainPath() async {
-    String appDownloadsPath = "";
     if (Platform.isAndroid) {
       final dir = await getExternalStorageDirectory();
-      List<String> paths = dir!.path.split('/');
-      for (var i in paths) {
-        if (i == "Android") break;
-        appDownloadsPath += "$i/";
-      }
+      return dir!.path;
     } else {
       final dir = await getApplicationDocumentsDirectory();
-      appDownloadsPath = dir.path;
+      return dir.path;
     }
-    return appDownloadsPath;
   }
 
   static Future<void> _createPathIfNotExist(String path) async {
