@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
@@ -160,13 +161,34 @@ class DownloaderBloc extends Bloc<DownloaderEvent, DownloaderState> {
     }
 
     final path = await DirHelper.getAppPath();
+    final legacyPath = await DirHelper.getLegacyAppPath();
+
+    final List<FileSystemEntity> files = [];
+
+    // Check current path
     final directory = Directory(path);
-    if (!await directory.exists()) {
+    if (await directory.exists()) {
+      files.addAll(await directory.list().toList());
+    }
+
+    // Check legacy path
+    if (legacyPath != null) {
+      final legacyDirectory = Directory(legacyPath);
+      if (await legacyDirectory.exists()) {
+        try {
+          files.addAll(await legacyDirectory.list().toList());
+        } catch (e) {
+          // If we don't have permission to list legacy directory, just ignore it
+          debugPrint("Could not access legacy directory: $e");
+        }
+      }
+    }
+
+    if (files.isEmpty) {
+      oldDownloads = [];
       emit(const OldDownloadsLoadingSuccess(downloads: []));
       return;
     }
-
-    final files = await directory.list().toList();
 
     // Sort files by modified date descending
     files.sort(

@@ -11,6 +11,22 @@ class DirHelper {
     return appPath;
   }
 
+  static Future<String?> getLegacyAppPath() async {
+    if (Platform.isAndroid) {
+      final dir = await getExternalStorageDirectory();
+      if (dir == null) return null;
+
+      String appDownloadsPath = "";
+      List<String> paths = dir.path.split('/');
+      for (var i in paths) {
+        if (i == "Android") break;
+        appDownloadsPath += "$i/";
+      }
+      return "${appDownloadsPath}TikTokVideos";
+    }
+    return null;
+  }
+
   static Future<String> _getMainPath() async {
     if (Platform.isAndroid) {
       final dir = await getExternalStorageDirectory();
