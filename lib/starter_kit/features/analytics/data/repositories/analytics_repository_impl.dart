@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 
 import '../../../../core/error/failure.dart';
 import '../../domain/entities/analytics_event.dart';
+import '../../domain/entities/ad_revenue_event.dart';
 import '../../domain/repositories/analytics_repository.dart';
 import '../datasources/analytics_remote_data_source.dart';
 
@@ -60,6 +61,14 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
   Future<Either<Failure, void>> trackAppOpen() async {
     // This could also interact with a local data source for retention tracking
     await logEvent(const AnalyticsEvent(name: 'app_open'));
+    return const Right(null);
+  }
+
+  @override
+  Future<Either<Failure, void>> logAdRevenue(AdRevenueEvent event) async {
+    for (final source in _dataSources) {
+      await source.logAdRevenue(event);
+    }
     return const Right(null);
   }
 }

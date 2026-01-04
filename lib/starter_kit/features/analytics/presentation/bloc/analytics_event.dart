@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../domain/entities/ad_revenue_event.dart';
 
 abstract class AnalyticsEvent extends Equatable {
   const AnalyticsEvent();
@@ -28,4 +29,13 @@ class AnalyticsSetUserId extends AnalyticsEvent {
 
   @override
   List<Object?> get props => [userId];
+}
+
+class AnalyticsLogAdRevenue extends AnalyticsEvent {
+  final AdRevenueEvent revenueEvent;
+
+  const AnalyticsLogAdRevenue(this.revenueEvent);
+
+  @override
+  List<Object?> get props => [revenueEvent];
 }

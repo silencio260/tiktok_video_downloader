@@ -1,6 +1,6 @@
 # Starter Kit Plugin
 
-A strictly architected, modular Clean Architecture plugin for Flutter apps.
+A strictly architected, modular plugin system for Flutter apps.
 
 ## Features at a Glance
 
@@ -9,205 +9,189 @@ A strictly architected, modular Clean Architecture plugin for Flutter apps.
 | **IAP** | Subscriptions & One-Time Purchases | Bloc + Clean Arch | ✅ (RevenueCat default) |
 | **Ads** | Interstitial, Reward, Banner | Bloc + Clean Arch | ✅ (AdMob default) |
 | **Analytics** | Unified Event Logging | Bloc (Retention) | ✅ (Firebase default) |
+| **PostHog** | Product Analytics | Wrapper | ✅ |
+| **Templates** | Onboarding & Settings | Widget Builders | N/A |
 | **Services** | Config, Rating, GDPR, Feedback | Repositories | ✅ |
 
 ---
 
 ## 🚀 Getting Started
 
-### 1. Installation
+### 1. Initialization
 
-Ensure `pubspec.yaml` includes:
-```yaml
-dependencies:
-  starter_kit:
-    path: ./lib/starter_kit
-  flutter_bloc: ^8.1.0
-  get_it: ^7.6.0
-  # ... provider specific packages (purchases_flutter, google_mobile_ads, firebase_core)
-```
-
-### 2. Initialization
-
-In your `main.dart`, initialize the kit before `runApp`. You can inject custom configurations here.
-
-```dart
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(); // Required for default providers
-
-  // Initialize Starter Kit with default providers
-  await StarterKit.initialize();
-
-  // OR: Initialize with CUSTOM providers (e.g. Adapty for IAP)
-  /*
-  await StarterKit.initialize(
-    iapDataSource: MyAdaptyDataSource(), 
-    adsDataSource: MyAppLovinDataSource(),
-    supportEmail: 'contact@myapp.com',
-  );
-  */
-
-  runApp(const MyApp());
-}
-```
-
----
-
-## 📦 Features & Examples
-
-### 1. In-App Purchases (IAP)
-
-**Goal:** Check subscription status and lock/unlock content.
-
-**Usage Example:**
-
-```dart
-// 1. Access the Bloc
-final iapBloc = StarterKit.iapBloc;
-
-// 2. Wrap your widget
-BlocProvider.value(
-  value: iapBloc..add(const IapInitialize(apiKey: 'appl_12345...')), // Initialize with your key
-  child: BlocBuilder<IapBloc, IapState>(
-    builder: (context, state) {
-      // HANDLE LOADING
-      if (state is IapLoading) {
-        return const CircularProgressIndicator();
-      }
-      
-      // CHECK PREMIUM STATUS
-      if (state is IapInitialized) {
-        if (state.status.isPremium) {
-           return const PremiumContentView();
-        }
-        return const LockedView(
-          onPurchaseTap: () {
-             // TRIGGER PURCHASE
-             iapBloc.add(const IapPurchaseProduct(productId: 'monthly_sub'));
-          }
-        );
-      }
-      
-      // HANDLE ERROR
-      if (state is IapError) {
-        return Text('Error: ${state.message}');
-      }
-      
-      return const SizedBox.shrink();
-    },
-  ),
-);
-```
-
-### 2. Ads
-
-**Goal:** Show an interstitial ad before a sensitive action.
-
-**Usage Example:**
-
-```dart
-// 1. Access the Bloc
-final adsBloc = StarterKit.adsBloc;
-
-// 2. Initialize
-adsBloc.add(AdsInitialize(
-  config: AdsConfig(
-    interstitialAdUnitId: 'ca-app-pub-3940256099942544/1033173712', // Test ID
-    rewardedAdUnitId: 'ca-app-pub-3940256099942544/5224354917',     // Test ID
-  ),
-));
-
-// 3. Load Ad
-adsBloc.add(const AdsLoadInterstitial(adUnitId: '...'));
-
-// 4. Listen and Show
-BlocListener<AdsBloc, AdsState>(
-  listener: (context, state) {
-    if (state is AdsReady && state.isInterstitialReady) {
-      // Ad is ready, show it
-      adsBloc.add(const AdsShowInterstitial());
-    }
-    
-    if (state is AdsShowSuccess) {
-       // Navigate to next screen after ad
-       Navigator.of(context).pushNamed('/next_screen');
-    }
-  },
-  child: MyWidget(),
-)
-```
-
-### 3. Analytics
-
-**Goal:** Log a custom event.
-
-**Usage Example:**
-
-```dart
-// Log simple event
-StarterKit.analyticsBloc.add(
-  const AnalyticsLogEvent(
-    name: 'video_downloaded',
-    parameters: {'video_id': '123', 'quality': 'HD'},
-  ),
-);
-```
-
-### 4. Services (Remote Config, GDPR, Rating)
-
-**Goal:** Fetch a feature flag or request review.
-
-```dart
-// REMOTE CONFIG
-final configRepo = StarterKit.sl<RemoteConfigRepository>();
-final showNewUI = configRepo.getBool('show_new_ui');
-
-// APP RATING
-final ratingRepo = StarterKit.sl<AppRatingRepository>();
-// Check eligibility (logic: installed > 3 days & launched > 5 times)
-final result = await ratingRepo.checkEligibility();
-if (result.getOrElse(() => false)) {
-  await ratingRepo.requestReview();
-}
-
-// GDPR
-final gdprRepo = StarterKit.sl<GdprRepository>();
-await gdprRepo.requestConsent();
-```
-
----
-
-## 🛠 Swapping Providers (The "Clean" Part)
-
-Want to switch from **RevenueCat** to **Adapty**? You don't need to rewrite your UI logic.
-
-1.  **Create a Data Source**: Implement the `IapRemoteDataSource` interface.
-
-```dart
-import 'package:starter_kit/features/iap/data/datasources/iap_remote_data_source.dart';
-
-class MyAdaptyDataSource implements IapRemoteDataSource {
-  @override
-  Future<void> initialize(String apiKey) async {
-    // Call Adapty.activate()
-  }
-
-  @override
-  Future<SubscriptionStatus> getSubscriptionStatus() async {
-    // Call Adapty.getPurchaserInfo() and map to SubscriptionStatus
-  }
-  
-  // Implement other methods...
-}
-```
-
-2.  **Inject it**:
+In your `main.dart`, initialize the kit before `runApp`.
 
 ```dart
 await StarterKit.initialize(
-  iapDataSource: MyAdaptyDataSource(), // <--- Swapped!
+  // Optional: Add PostHog
+  postHogDataSource: PostHogRemoteDataSourceImpl(), // Or custom
+  
+  // Optional: Custom Support Email for Feedback
+  supportEmail: 'support@myapp.com',
 );
 ```
 
-Everything else (`IapBloc`, UI widgets) works exactly the same.
+---
+
+## 🎨 UI Templates
+
+### 1. Onboarding
+Create a robust onboarding flow in seconds.
+
+```dart
+class MyOnboardingScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return StarterKit.onboarding(
+      template: OnboardingTemplateType.standard, // standard, minimal, or custom
+      pages: [
+        OnboardingPageModel(
+          title: 'Welcome',
+          description: 'The best app ever.',
+          imagePath: 'assets/welcome.png',
+          titleColor: Colors.blue,
+        ),
+        OnboardingPageModel(
+          title: 'Get Started',
+          description: 'Sign up now.',
+          customWidget: MyCustomHeroWidget(),
+        ),
+      ],
+      onComplete: () {
+        // Navigate or save state
+        Navigator.of(context).pushReplacementNamed('/home');
+      },
+      onSkip: () {
+        // Handle skip
+      },
+    );
+  }
+}
+```
+
+### 2. Settings Page
+Generate a settings screen dynamically.
+
+```dart
+class MySettingsScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return StarterKit.settings(
+      template: SettingsTemplateType.grouped, // list or grouped
+      title: 'Preferences',
+      sections: [
+        SettingsSection(
+          title: 'General',
+          tiles: [
+            SettingsTile(
+              title: 'Dark Mode',
+              icon: Icons.dark_mode,
+              onTap: () { /* Toggle Theme */ },
+            ),
+            SettingsTile(
+              title: 'Language',
+              icon: Icons.language,
+              subtitle: 'English',
+              onTap: () { /* Change Language */ },
+            ),
+          ],
+        ),
+        SettingsSection(
+          title: 'Account',
+          tiles: [
+            SettingsTile(
+              title: 'Restore Purchases',
+              icon: Icons.restore,
+              onTap: () { StarterKit.iapBloc.add(const IapRestorePurchases()); },
+            ),
+            SettingsTile(
+              title: 'Privacy Policy',
+              icon: Icons.lock,
+              onTap: () { /* Open Webview */ },
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+```
+
+---
+
+## 📊 Analytics & PostHog
+
+### 3. Ad Revenue Analytics (Auto-Wired) 💸
+To track ad revenue automatically across all providers (Firebase, PostHog, etc.):
+
+1.  **StarterKit handles the wiring**: When you initialize the kit, `AdsBloc` events are automatically piped to `AnalyticsBloc`.
+2.  **Firebase**: Logs as `ad_impression` (ROAS ready).
+3.  **PostHog**: Logs as `ad_revenue` custom event.
+
+```dart
+// No extra code needed! Just initialize properly:
+await StarterKit.initialize(
+  adsDataSource: MyAdMobDataSource(), // Your ads impl
+  // The kit automatically listens to paid events and logs them!
+);
+```
+
+### Accessing PostHog
+If you initialized PostHog, you can access it safely:
+
+```dart
+StarterKit.postHog?.capture(
+  eventName: 'video_shared',
+  properties: {'platform': 'tiktok'},
+);
+
+StarterKit.postHog?.identify(
+  userId: 'user_123',
+  userProperties: {'plan': 'premium'},
+);
+```
+
+### Unified Analytics (Firebase + Others)
+Use the Bloc for general event logging (goes to Firebase by default).
+
+```dart
+StarterKit.analyticsBloc.add(
+  const AnalyticsLogEvent(name: 'app_open'),
+);
+```
+
+---
+
+## 🛠 Feature Reference
+
+### In-App Purchases (IAP)
+*   **Bloc**: `StarterKit.iapBloc`
+*   **Events**: `IapInitialize`, `IapPurchaseProduct`, `IapRestorePurchases`.
+*   **States**: `IapLoading`, `IapInitialized` (contains `SubscriptionStatus`, `products`), `IapError`.
+
+### Ads
+*   **Bloc**: `StarterKit.adsBloc`
+*   **Events**: `AdsInitialize`, `AdsLoadInterstitial`, `AdsShowInterstitial`.
+*   **States**: `AdsReady`, `AdsShowSuccess`, `AdsError`.
+
+### Services
+*   **Remote Config**: `StarterKit.sl<RemoteConfigRepository>()`
+*   **GDPR**: `StarterKit.sl<GdprRepository>()`
+*   **App Rating**: `StarterKit.sl<AppRatingRepository>()`
+*   **Feedback**: `StarterKit.sl<FeedbackRepository>()`
+
+---
+
+## 🧩 Dependency Injection
+Because `StarterKit` uses `GetIt`, you can inject your own implementations.
+
+**Example: Swapping Analytics Provider**
+```dart
+class MyMixpanelDataSource implements AnalyticsRemoteDataSource {
+  // ... implementation ...
+}
+
+await StarterKit.initialize(
+  analyticsDataSources: [MyMixpanelDataSource()],
+);
+```

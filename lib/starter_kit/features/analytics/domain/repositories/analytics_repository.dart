@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 
 import '../../../../core/error/failure.dart';
 import '../entities/analytics_event.dart';
+import '../entities/ad_revenue_event.dart';
 
 /// Abstract repository for analytics operations
 abstract class AnalyticsRepository {
@@ -10,6 +11,9 @@ abstract class AnalyticsRepository {
 
   /// Log a custom event
   Future<Either<Failure, void>> logEvent(AnalyticsEvent event);
+
+  /// Log ad revenue
+  Future<Either<Failure, void>> logAdRevenue(AdRevenueEvent event);
 
   /// Set user ID
   Future<Either<Failure, void>> setUserId(String userId);

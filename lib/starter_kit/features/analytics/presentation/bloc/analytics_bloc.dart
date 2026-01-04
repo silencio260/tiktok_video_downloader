@@ -3,17 +3,23 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/analytics_event.dart' as entity;
 import '../../domain/repositories/analytics_repository.dart';
 import '../../domain/usecases/log_event_usecase.dart';
+import '../../domain/usecases/log_ad_revenue_usecase.dart';
 import 'analytics_event.dart';
 import 'analytics_state.dart';
 
 class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
   final AnalyticsRepository repository;
   final LogEventUseCase logEventUseCase;
+  final LogAdRevenueUseCase logAdRevenueUseCase;
 
-  AnalyticsBloc({required this.repository, required this.logEventUseCase})
-    : super(const AnalyticsInitial()) {
+  AnalyticsBloc({
+    required this.repository,
+    required this.logEventUseCase,
+    required this.logAdRevenueUseCase,
+  }) : super(const AnalyticsInitial()) {
     on<AnalyticsInitialize>(_onInitialize);
     on<AnalyticsLogEvent>(_onLogEvent);
+    on<AnalyticsLogAdRevenue>(_onLogAdRevenue);
     on<AnalyticsSetUserId>(_onSetUserId);
   }
 
@@ -42,5 +48,12 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
     Emitter<AnalyticsState> emit,
   ) async {
     await repository.setUserId(event.userId);
+  }
+
+  Future<void> _onLogAdRevenue(
+    AnalyticsLogAdRevenue event,
+    Emitter<AnalyticsState> emit,
+  ) async {
+    await logAdRevenueUseCase(event.revenueEvent);
   }
 }

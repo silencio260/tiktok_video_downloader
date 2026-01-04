@@ -6,6 +6,7 @@ import '../../domain/entities/ad_unit.dart';
 import '../../domain/usecases/show_interstitial_usecase.dart';
 import '../../domain/usecases/show_rewarded_usecase.dart';
 import '../../domain/repositories/ads_repository.dart';
+import '../../../analytics/domain/entities/ad_revenue_event.dart';
 
 part 'ads_event.dart';
 part 'ads_state.dart';
@@ -15,11 +16,13 @@ class AdsBloc extends Bloc<AdsEvent, AdsState> {
   final AdsRepository adsRepository;
   final ShowInterstitialUseCase showInterstitialUseCase;
   final ShowRewardedUseCase showRewardedUseCase;
+  final void Function(AdRevenueEvent)? onPaidEvent;
 
   AdsBloc({
     required this.adsRepository,
     required this.showInterstitialUseCase,
     required this.showRewardedUseCase,
+    this.onPaidEvent,
   }) : super(const AdsInitial()) {
     on<AdsInitialize>(_onInitialize);
     on<AdsLoadInterstitial>(_onLoadInterstitial);

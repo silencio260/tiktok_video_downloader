@@ -2,6 +2,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 import '../../domain/entities/analytics_event.dart';
+import '../../domain/entities/ad_revenue_event.dart';
 import 'analytics_remote_data_source.dart';
 
 /// Firebase implementation of analytics data source
@@ -22,6 +23,18 @@ class FirebaseAnalyticsDataSource implements AnalyticsRemoteDataSource {
     await _analytics?.logEvent(
       name: event.name,
       parameters: event.parameters.cast<String, Object>(),
+    );
+  }
+
+  @override
+  Future<void> logAdRevenue(AdRevenueEvent event) async {
+    if (!_isInitialized) return;
+    await _analytics?.logAdImpression(
+      value: event.value,
+      currency: event.currency,
+      adSource: event.adSource,
+      adUnitName: event.adUnitId,
+      adFormat: event.adFormat,
     );
   }
 
