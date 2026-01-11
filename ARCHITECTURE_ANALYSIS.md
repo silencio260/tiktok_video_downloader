@@ -873,6 +873,183 @@ MaterialApp(
 - **FontManager**: Font weights and sizes
 - **StylesManager**: Text style generators
 
+### Environment Variables (`config/environment_vars.dart`)
+
+The project uses environment variables for configuration management, following a structured approach with JSON files and a centralized access class.
+
+#### Structure
+
+The environment variables are organized in the following structure:
+
+```
+project_root/
+├── env/                    # Environment configuration directory
+│   ├── dev.json           # Development environment config
+│   ├── release.json       # Release/production environment config
+│   └── special_dev.json   # Special development environment config
+└── env.example.json       # Example/template file
+```
+
+#### Environment Files
+
+Each JSON file in the `env/` directory contains configuration values for different build environments:
+
+**`env/dev.json`** - Development environment:
+```json
+{
+  "founders_version": false,
+  "special_version_mode": true,
+  "development_mode": true,
+  "firebase_api_key_android": "",
+  "firebase_api_key_ios": "",
+  "banner_ad_id": "",
+  "interstitial_ad_id": "",
+  "one_signal_app_id": "",
+  "revenue_cat_api_key_android": "",
+  "posthog_api_key": "",
+  "feed_back_nest_api_key": ""
+}
+```
+
+**`env/release.json`** - Production/release environment:
+```json
+{
+  "founders_version": false,
+  "special_version_mode": false,
+  "development_mode": false,
+  "firebase_api_key_android": "",
+  "firebase_api_key_ios": "",
+  "banner_ad_id": "",
+  "interstitial_ad_id": "",
+  "one_signal_app_id": "",
+  "revenue_cat_api_key_android": "",
+  "posthog_api_key": "",
+  "feed_back_nest_api_key": ""
+}
+```
+
+**`env/special_dev.json`** - Special development environment:
+```json
+{
+  "founders_version": true,
+  "special_version_mode": true,
+  "development_mode": true,
+  "firebase_api_key_android": "",
+  "firebase_api_key_ios": "",
+  "banner_ad_id": "",
+  "interstitial_ad_id": "",
+  "one_signal_app_id": "",
+  "revenue_cat_api_key_android": "",
+  "posthog_api_key": "",
+  "feed_back_nest_api_key": ""
+}
+```
+
+**`env.example.json`** - Template/example file (can be committed to version control):
+- Contains the same structure as other env files
+- Values are empty strings
+- Serves as a template for developers
+
+#### Environment Variables Class
+
+The `EnvironmentsVar` class (`lib/src/config/environment_vars.dart`) provides centralized access to all environment variables using Dart's compile-time constants (`String.fromEnvironment()` and `bool.fromEnvironment()`).
+
+**Key Features**:
+- Type-safe access to environment variables
+- Compile-time constants for better performance
+- Helper methods for common checks
+- Default values for all variables
+
+**Usage Example**:
+```dart
+import 'package:tiktok_video_downloader/src/config/environment_vars.dart';
+
+// Access environment variables
+final apiKey = EnvironmentsVar.posthogApiKey;
+final isDevMode = EnvironmentsVar.isDeveloperMode;
+
+// Check if services are configured
+if (EnvironmentsVar.hasPosthog) {
+  // Initialize PostHog
+}
+
+if (EnvironmentsVar.hasRevenueCatAndroid) {
+  // Initialize RevenueCat for Android
+}
+```
+
+**Available Variables**:
+
+| Variable | Type | Description |
+|----------|------|-------------|
+| `foundersVersion` | `bool` | Indicates if founders version is enabled |
+| `specialVersionMode` | `bool` | Special version mode flag |
+| `developmentMode` | `bool` | Development mode flag |
+| `firebaseApiKeyAndroid` | `String` | Firebase API key for Android |
+| `firebaseApiKeyIos` | `String` | Firebase API key for iOS |
+| `bannerAdId` | `String` | AdMob banner ad unit ID |
+| `interstitialAdId` | `String` | AdMob interstitial ad unit ID |
+| `oneSignalAppId` | `String` | OneSignal app ID for push notifications |
+| `revenueCatApiKeyAndroid` | `String` | RevenueCat API key for Android |
+| `posthogApiKey` | `String` | PostHog analytics API key |
+| `feedBackNestApiKey` | `String` | Feedback Nest API key |
+
+**Helper Methods**:
+- `isDeveloperMode`: Returns true if development mode is enabled
+- `isFoundersVersion`: Returns true if founders version is enabled
+- `isSpecialVersionMode`: Returns true if special version mode is enabled
+- `hasRevenueCatAndroid`: Returns true if RevenueCat Android API key is configured
+- `hasPosthog`: Returns true if PostHog API key is configured
+- `hasOneSignal`: Returns true if OneSignal app ID is configured
+
+#### Building with Environment Variables
+
+Environment variables are passed to the Flutter build process using the `--dart-define-from-file` flag:
+
+**Development Build**:
+```bash
+flutter run --dart-define-from-file=env/dev.json
+```
+
+**Release Build**:
+```bash
+flutter build apk --release --dart-define-from-file=env/release.json
+flutter build appbundle --dart-define-from-file=env/release.json
+```
+
+**Special Dev Build**:
+```bash
+flutter run --dart-define-from-file=env/special_dev.json
+```
+
+#### Setup Process
+
+1. **Create Environment Files**:
+   - Copy `env.example.json` structure to create `env/dev.json`, `env/release.json`, and `env/special_dev.json`
+   - Fill in the actual values for each environment
+
+2. **Update .gitignore**:
+   - Ensure `env/*.json` files are NOT committed (they contain sensitive keys)
+   - `env.example.json` can be committed as it contains no actual values
+
+3. **Access in Code**:
+   - Import `EnvironmentsVar` class: `import 'package:tiktok_video_downloader/src/config/environment_vars.dart';`
+   - Access variables: `EnvironmentsVar.posthogApiKey`
+   - Use helper methods: `EnvironmentsVar.hasPosthog`
+
+4. **Build Configuration**:
+   - Always specify the environment file when building: `--dart-define-from-file=env/<env_file>.json`
+   - Use appropriate file for each build type (dev, release, special_dev)
+
+#### Best Practices
+
+- ✅ **Never commit actual values**: Keep `env/*.json` files out of version control
+- ✅ **Use example file**: Commit `env.example.json` as a template
+- ✅ **Environment-specific files**: Use different files for dev, release, and special builds
+- ✅ **Type safety**: Always use `EnvironmentsVar` class instead of raw strings
+- ✅ **Helper methods**: Use helper methods (`hasPosthog`, `isDeveloperMode`, etc.) for conditional logic
+- ✅ **Build commands**: Always include `--dart-define-from-file` flag in build commands
+
 ---
 
 ## Starter Kit System
@@ -1796,7 +1973,7 @@ class DownloaderScreen extends StatelessWidget {
 6. **Use Case Pattern**: Single responsibility, business logic encapsulation
 7. **Entity/Model Separation**: Domain entities vs data models
 8. **Feature-Based Organization**: Self-contained feature modules
-9. **Configuration Management**: Centralized routes, themes, constants
+9. **Configuration Management**: Centralized routes, themes, constants, and environment variables
 10. **Starter Kit System**: Reusable, production-ready features
 11. **Localization Strategy**: Centralized text classes, feature-based organization, ready for i18n
 
