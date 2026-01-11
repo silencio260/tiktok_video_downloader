@@ -22,14 +22,23 @@ class AdsInitialized extends AdsState {
 class AdsReady extends AdsState {
   final bool isInterstitialReady;
   final bool isRewardedReady;
+  final bool isAppOpenReady;
+  final bool isNativeReady;
 
   const AdsReady({
     this.isInterstitialReady = false,
     this.isRewardedReady = false,
+    this.isAppOpenReady = false,
+    this.isNativeReady = false,
   });
 
   @override
-  List<Object?> get props => [isInterstitialReady, isRewardedReady];
+  List<Object?> get props => [
+        isInterstitialReady,
+        isRewardedReady,
+        isAppOpenReady,
+        isNativeReady,
+      ];
 }
 
 class AdsShowSuccess extends AdsState {

@@ -46,3 +46,28 @@ class AdsLoadRewarded extends AdsEvent {
 class AdsShowRewarded extends AdsEvent {
   const AdsShowRewarded();
 }
+
+/// Load an app open ad
+class AdsLoadAppOpen extends AdsEvent {
+  final String adUnitId;
+
+  const AdsLoadAppOpen({required this.adUnitId});
+
+  @override
+  List<Object?> get props => [adUnitId];
+}
+
+/// Show an app open ad
+class AdsShowAppOpen extends AdsEvent {
+  const AdsShowAppOpen();
+}
+
+/// Load a native ad
+class AdsLoadNative extends AdsEvent {
+  final String adUnitId;
+
+  const AdsLoadNative({required this.adUnitId});
+
+  @override
+  List<Object?> get props => [adUnitId];
+}

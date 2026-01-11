@@ -34,6 +34,7 @@ class StarterKit {
     List<AnalyticsRemoteDataSource>? analyticsDataSources,
     PostHogRemoteDataSource? postHogDataSource,
     String? supportEmail,
+    String? feedbackNestApiKey,
   }) async {
     // Analytics & PostHog
     initAnalyticsFeature(
@@ -58,6 +59,7 @@ class StarterKit {
     initServicesFeature(
       _sl,
       supportEmail: supportEmail ?? 'support@example.com',
+      feedbackNestApiKey: feedbackNestApiKey,
     );
   }
 

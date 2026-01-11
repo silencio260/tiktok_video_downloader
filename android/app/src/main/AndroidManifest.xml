@@ -43,6 +43,7 @@
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-4210665095499726~2328415243"/>
+        <meta-data android:name="com.posthog.posthog.AUTO_INIT" android:value="false" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

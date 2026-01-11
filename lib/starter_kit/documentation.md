@@ -16,7 +16,8 @@ Must be called in `main.dart` before `runApp`.
 | `adsDataSource` | `AdsRemoteDataSource?` | No | `null` | Custom Ads logic. If null, uses AdMob implementation. |
 | `analyticsDataSources` | `List<AnalyticsRemoteDataSource>?` | No | `null` | List of analytics providers (e.g., Firebase, Mixpanel). Default: Firebase. |
 | `posthogDataSource` | `PostHogRemoteDataSource?` | No | `null` | Custom PostHog wrapper. Default: Standard PostHog implementation. |
-| `supportEmail` | `String?` | No | `'support@example.com'` | Email used for the Feedback service. |
+| `supportEmail` | `String?` | No | `'support@example.com'` | Email used for the Feedback service (if Feedback Nest API key is not provided). |
+| `feedbackNestApiKey` | `String?` | No | `null` | Feedback Nest API key. If provided, uses Feedback Nest API instead of email. |
 
 **Example:**
 ```dart
@@ -96,16 +97,186 @@ Returns a `Widget` representing a generated settings page.
 
 ---
 
+## 📱 Ads
+
+### Ad Types Supported
+
+The StarterKit supports the following ad types:
+
+| Ad Type | Description | Events |
+| :--- | :--- | :--- |
+| **Banner** | Small ads displayed at the top or bottom of the screen | `AdsLoadBanner` |
+| **Interstitial** | Full-screen ads shown between app screens | `AdsLoadInterstitial`, `AdsShowInterstitial` |
+| **Rewarded** | Full-screen ads that reward users for watching | `AdsLoadRewarded`, `AdsShowRewarded` |
+| **App Open** | Ads shown when the app is opened | `AdsLoadAppOpen`, `AdsShowAppOpen` |
+| **Native** | Customizable ads that match your app's design | `AdsLoadNative` |
+
+### App Open Ads
+
+App Open ads are shown when the app is launched or brought to the foreground.
+
+**Load App Open Ad:**
+```dart
+StarterKit.adsBloc.add(AdsLoadAppOpen(adUnitId: 'ca-app-pub-...'));
+```
+
+**Show App Open Ad:**
+```dart
+StarterKit.adsBloc.add(const AdsShowAppOpen());
+```
+
+**Listen for App Open Ad State:**
+```dart
+BlocListener<AdsBloc, AdsState>(
+  listener: (context, state) {
+    if (state is AdsShowSuccess && state.type == AdType.appOpen) {
+      // App open ad was shown successfully
+    }
+  },
+  child: YourWidget(),
+)
+```
+
+### Native Ads
+
+Native ads are customizable ads that match your app's design. They require custom widgets to display.
+
+**Load Native Ad:**
+```dart
+StarterKit.adsBloc.add(AdsLoadNative(adUnitId: 'ca-app-pub-...'));
+```
+
+**Use Native Ad Widget:**
+```dart
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+
+NativeAdWidget(
+  adUnitId: 'ca-app-pub-...',
+  factoryId: 'your_factory_id',
+)
+```
+
+---
+
+## 🔔 Push Notifications (OneSignal)
+
+The StarterKit includes OneSignal push notifications support. Access the push notifications repository through the service locator.
+
+**Initialize OneSignal:**
+```dart
+final pushRepo = StarterKit.sl<PushNotificationsRepository>();
+await pushRepo.initialize('your_onesignal_app_id');
+```
+
+**Set User ID:**
+```dart
+await pushRepo.setUserId('user_123');
+```
+
+**Set Email:**
+```dart
+await pushRepo.setEmail('user@example.com');
+```
+
+**Send Tags:**
+```dart
+// Single tag
+await pushRepo.sendTag('user_type', 'premium');
+
+// Multiple tags
+await pushRepo.sendTags({
+  'user_type': 'premium',
+  'subscription': 'monthly',
+});
+```
+
+**Get Player ID:**
+```dart
+final result = await pushRepo.getPlayerId();
+result.fold(
+  (failure) => print('Error: ${failure.message}'),
+  (playerId) => print('Player ID: $playerId'),
+);
+```
+
+**Enable/Disable Notifications:**
+```dart
+// Enable
+await pushRepo.enable();
+
+// Disable
+await pushRepo.disable();
+
+// Check if enabled
+final result = await pushRepo.isEnabled();
+```
+
+---
+
+## 💬 Feedback
+
+The StarterKit supports two feedback methods:
+
+### Email Feedback (Default)
+
+If no Feedback Nest API key is provided, feedback is sent via email:
+
+```dart
+await StarterKit.initialize(
+  supportEmail: 'support@myapp.com',
+);
+```
+
+### Feedback Nest API
+
+To use Feedback Nest API, provide your API key during initialization:
+
+```dart
+await StarterKit.initialize(
+  feedbackNestApiKey: 'your_feedback_nest_api_key',
+);
+```
+
+**Submit Feedback:**
+```dart
+final feedbackRepo = StarterKit.sl<FeedbackRepository>();
+final result = await feedbackRepo.submitFeedback(
+  'This app is amazing!',
+  email: 'user@example.com', // Optional
+);
+
+result.fold(
+  (failure) => print('Error: ${failure.message}'),
+  (_) => print('Feedback submitted successfully'),
+);
+```
+
+---
+
 ## 📦 Dependency Injection (Advanced)
 
-Access internal blocs if you need to trigger events manually:
+Access internal blocs and repositories if you need to trigger events manually:
 
+### Blocs
 *   `StarterKit.iapBloc` -> `IapBloc`
 *   `StarterKit.adsBloc` -> `AdsBloc`
 *   `StarterKit.analyticsBloc` -> `AnalyticsBloc`
 *   `StarterKit.postHog` -> `PostHogRemoteDataSource?`
 
+### Services (via Service Locator)
+*   `StarterKit.sl<RemoteConfigRepository>()` -> Remote Config
+*   `StarterKit.sl<GdprRepository>()` -> GDPR
+*   `StarterKit.sl<AppRatingRepository>()` -> App Rating
+*   `StarterKit.sl<FeedbackRepository>()` -> Feedback
+*   `StarterKit.sl<PushNotificationsRepository>()` -> Push Notifications (OneSignal)
+
 **Example: Restore Purchases**
 ```dart
 StarterKit.iapBloc.add(const IapRestorePurchases());
+```
+
+**Example: Access Push Notifications Repository**
+```dart
+final pushRepo = StarterKit.sl<PushNotificationsRepository>();
+await pushRepo.initialize('your_onesignal_app_id');
 ```

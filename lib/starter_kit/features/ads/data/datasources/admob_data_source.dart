@@ -15,6 +15,8 @@ import 'ads_remote_data_source.dart';
 class AdMobDataSource implements AdsRemoteDataSource {
   InterstitialAd? _interstitialAd;
   RewardedAd? _rewardedAd;
+  AppOpenAd? _appOpenAd;
+  NativeAd? _nativeAd;
   AdsConfig? _config;
   bool _isInitialized = false;
 
@@ -41,6 +43,12 @@ class AdMobDataSource implements AdsRemoteDataSource {
       }
       if (config.rewardedAdUnitId != null) {
         await loadRewarded(config.rewardedAdUnitId!);
+      }
+      if (config.appOpenAdUnitId != null) {
+        await loadAppOpen(config.appOpenAdUnitId!);
+      }
+      if (config.nativeAdUnitId != null) {
+        await loadNative(config.nativeAdUnitId!);
       }
     } catch (e) {
       throw ConfigurationException(message: 'Failed to initialize AdMob: $e');
@@ -194,11 +202,99 @@ class AdMobDataSource implements AdsRemoteDataSource {
   }
 
   @override
+  Future<AdUnit> loadAppOpen(String adUnitId) async {
+    _ensureInitialized();
+
+    final completer = Completer<AdUnit>();
+
+    await AppOpenAd.load(
+      adUnitId: adUnitId,
+      request: const AdRequest(),
+      adLoadCallback: AppOpenAdLoadCallback(
+        onAdLoaded: (ad) {
+          _appOpenAd = ad;
+          _appOpenAd!.fullScreenContentCallback = FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (ad) {
+              ad.dispose();
+              _appOpenAd = null;
+              // Preload next ad
+              if (_config?.appOpenAdUnitId != null) {
+                loadAppOpen(_config!.appOpenAdUnitId!);
+              }
+            },
+            onAdFailedToShowFullScreenContent: (ad, error) {
+              ad.dispose();
+              _appOpenAd = null;
+            },
+          );
+          completer.complete(
+            AdUnit(id: adUnitId, type: AdType.appOpen, isLoaded: true),
+          );
+        },
+        onAdFailedToLoad: (error) {
+          completer.complete(
+            AdUnit(
+              id: adUnitId,
+              type: AdType.appOpen,
+              isLoaded: false,
+              isFailed: true,
+            ),
+          );
+        },
+      ),
+    );
+
+    return completer.future;
+  }
+
+  @override
+  Future<bool> showAppOpen() async {
+    _ensureInitialized();
+
+    if (_appOpenAd == null) {
+      throw const AdException(message: 'App open ad not loaded');
+    }
+
+    await _appOpenAd!.show();
+    return true;
+  }
+
+  @override
+  Future<bool> isAppOpenReady() async {
+    return _appOpenAd != null;
+  }
+
+  @override
+  Future<AdUnit> loadNative(String adUnitId) async {
+    _ensureInitialized();
+
+    final completer = Completer<AdUnit>();
+
+    // Native ad will be loaded and managed by widgets
+    // This method returns a placeholder to indicate the ad unit is ready
+    completer.complete(
+      AdUnit(id: adUnitId, type: AdType.native, isLoaded: true),
+    );
+
+    return completer.future;
+  }
+
+  @override
+  Future<bool> isNativeReady() async {
+    // Native ads are always ready as they're loaded by widgets
+    return true;
+  }
+
+  @override
   Future<void> dispose() async {
     _interstitialAd?.dispose();
     _rewardedAd?.dispose();
+    _appOpenAd?.dispose();
+    _nativeAd?.dispose();
     _interstitialAd = null;
     _rewardedAd = null;
+    _appOpenAd = null;
+    _nativeAd = null;
   }
 
   void _ensureInitialized() {

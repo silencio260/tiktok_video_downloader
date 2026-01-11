@@ -106,6 +106,62 @@ class AdsRepositoryImpl implements AdsRepository {
   }
 
   @override
+  Future<Either<Failure, AdUnit>> loadAppOpen(String adUnitId) async {
+    try {
+      final adUnit = await remoteDataSource.loadAppOpen(adUnitId);
+      return Right(adUnit);
+    } on AdException catch (e) {
+      return Left(AdFailure(message: e.message));
+    } catch (e) {
+      return Left(UnknownFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool>> showAppOpen() async {
+    try {
+      final result = await remoteDataSource.showAppOpen();
+      return Right(result);
+    } on AdException catch (e) {
+      return Left(AdFailure(message: e.message));
+    } catch (e) {
+      return Left(UnknownFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool>> isAppOpenReady() async {
+    try {
+      final ready = await remoteDataSource.isAppOpenReady();
+      return Right(ready);
+    } catch (e) {
+      return Left(UnknownFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, AdUnit>> loadNative(String adUnitId) async {
+    try {
+      final adUnit = await remoteDataSource.loadNative(adUnitId);
+      return Right(adUnit);
+    } on AdException catch (e) {
+      return Left(AdFailure(message: e.message));
+    } catch (e) {
+      return Left(UnknownFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool>> isNativeReady() async {
+    try {
+      final ready = await remoteDataSource.isNativeReady();
+      return Right(ready);
+    } catch (e) {
+      return Left(UnknownFailure(message: e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> dispose() async {
     try {
       await remoteDataSource.dispose();

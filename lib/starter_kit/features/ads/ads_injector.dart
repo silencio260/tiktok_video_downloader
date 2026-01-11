@@ -6,6 +6,7 @@ import 'data/repositories/ads_repository_impl.dart';
 import 'domain/repositories/ads_repository.dart';
 import 'domain/usecases/show_interstitial_usecase.dart';
 import 'domain/usecases/show_rewarded_usecase.dart';
+import 'domain/usecases/show_app_open_usecase.dart';
 import 'presentation/bloc/ads_bloc.dart';
 
 import '../analytics/domain/entities/ad_revenue_event.dart';
@@ -37,6 +38,9 @@ void initAdsFeature(
   sl.registerLazySingleton<ShowRewardedUseCase>(
     () => ShowRewardedUseCase(repository: sl()),
   );
+  sl.registerLazySingleton<ShowAppOpenUseCase>(
+    () => ShowAppOpenUseCase(repository: sl()),
+  );
 
   // Bloc
   sl.registerFactory<AdsBloc>(
@@ -44,6 +48,7 @@ void initAdsFeature(
       adsRepository: sl(),
       showInterstitialUseCase: sl(),
       showRewardedUseCase: sl(),
+      showAppOpenUseCase: sl(),
       onPaidEvent: onPaidEvent,
     ),
   );

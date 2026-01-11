@@ -34,6 +34,15 @@ class EnvironmentsVar {
   static const String interstitialAdId =
       String.fromEnvironment('interstitial_ad_id', defaultValue: '');
 
+  static const String appOpenAdId =
+      String.fromEnvironment('app_open_ad_id', defaultValue: '');
+
+  static const String rewardedAdId =
+      String.fromEnvironment('rewareded_ad_id', defaultValue: '');
+
+  static const String nativeAdId =
+      String.fromEnvironment('native_ad_id', defaultValue: '');
+
   // OneSignal
   static const String oneSignalAppId =
       String.fromEnvironment('one_signal_app_id', defaultValue: '');

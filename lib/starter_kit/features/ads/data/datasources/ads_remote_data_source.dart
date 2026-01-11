@@ -33,6 +33,21 @@ abstract class AdsRemoteDataSource {
   /// Check if rewarded is ready
   Future<bool> isRewardedReady();
 
+  /// Load an app open ad
+  Future<AdUnit> loadAppOpen(String adUnitId);
+
+  /// Show an app open ad
+  Future<bool> showAppOpen();
+
+  /// Check if app open ad is ready
+  Future<bool> isAppOpenReady();
+
+  /// Load a native ad
+  Future<AdUnit> loadNative(String adUnitId);
+
+  /// Check if native ad is ready
+  Future<bool> isNativeReady();
+
   /// Dispose all ads
   Future<void> dispose();
 }

@@ -55,6 +55,21 @@ abstract class AdsRepository {
   /// Check if rewarded is ready
   Future<Either<Failure, bool>> isRewardedReady();
 
+  /// Load an app open ad
+  Future<Either<Failure, AdUnit>> loadAppOpen(String adUnitId);
+
+  /// Show an app open ad
+  Future<Either<Failure, bool>> showAppOpen();
+
+  /// Check if app open ad is ready
+  Future<Either<Failure, bool>> isAppOpenReady();
+
+  /// Load a native ad
+  Future<Either<Failure, AdUnit>> loadNative(String adUnitId);
+
+  /// Check if native ad is ready
+  Future<Either<Failure, bool>> isNativeReady();
+
   /// Dispose all ads
   Future<Either<Failure, void>> dispose();
 }
