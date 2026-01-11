@@ -7,12 +7,15 @@ import 'src/container_injector.dart';
 import 'src/my_app.dart';
 import 'starter_kit/starter_kit.dart';
 import 'starter_kit/features/analytics/presentation/bloc/analytics_event.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Initialize Firebase
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   
   // Initialize StarterKit (Analytics, Ads, IAP, Services)
   await StarterKit.initialize();
