@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "57271583114",
+    "project_id": "tt-video-downloader-3214c",
+    "storage_bucket": "tt-video-downloader-3214c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:57271583114:android:ea853421ea35630f598873",
+        "android_client_info": {
+          "package_name": "com.gentech.tiktok_video_downloader"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCzWU0ilsSfClcNiLih_5Z5AOuKCBjCwLg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
