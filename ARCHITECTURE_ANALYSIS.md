@@ -1050,6 +1050,86 @@ flutter run --dart-define-from-file=env/special_dev.json
 - ✅ **Helper methods**: Use helper methods (`hasPosthog`, `isDeveloperMode`, etc.) for conditional logic
 - ✅ **Build commands**: Always include `--dart-define-from-file` flag in build commands
 
+#### IDE Run Configurations (⚠️ VERY IMPORTANT)
+
+**Critical**: The project includes pre-configured run configurations for both Android Studio and VS Code/Cursor that automatically use the correct environment files. **Do not manually configure run configurations in the IDE GUI** - use the provided configuration files instead.
+
+##### Android Studio / IntelliJ IDEA
+
+Run configurations are stored in `.run/` directory:
+
+- **`.run/Dev.run.xml`** - Development environment (set as default)
+  - Uses: `env/dev.json`
+  - Automatically selected when you click Run
+  
+- **`.run/Release.run.xml`** - Release/production environment
+  - Uses: `env/release.json` with `--release` flag
+  
+- **`.run/Special Dev.run.xml`** - Special development environment
+  - Uses: `env/special_dev.json`
+
+**Usage in Android Studio:**
+1. Open Run → Edit Configurations (or click dropdown next to Run button)
+2. Select the configuration you want: "Dev", "Release", or "Special Dev"
+3. Click Run - the correct environment file is automatically used
+
+**Benefits:**
+- ✅ No manual GUI configuration needed
+- ✅ Configurations are version-controlled in `.run/` directory
+- ✅ Team members automatically get the same configurations
+- ✅ Dev environment is set as default
+
+##### VS Code / Cursor
+
+Run configurations are stored in `.vscode/launch.json`:
+
+- **Dev** - Development environment (first configuration, typically default)
+  - Uses: `env/dev.json`
+  
+- **Release** - Release/production environment
+  - Uses: `env/release.json` in release mode
+  
+- **Special Dev** - Special development environment
+  - Uses: `env/special_dev.json`
+
+**Usage in VS Code/Cursor:**
+1. Open Run and Debug panel (Ctrl+Shift+D / Cmd+Shift+D)
+2. Select configuration from dropdown: "Dev", "Release", or "Special Dev"
+3. Click Run or press F5 - the correct environment file is automatically used
+
+**Benefits:**
+- ✅ No manual configuration needed
+- ✅ Configurations are version-controlled in `.vscode/launch.json`
+- ✅ Works across VS Code, Cursor, and other VS Code-based editors
+- ✅ Consistent configuration for all team members
+
+##### ⚠️ Important Notes
+
+1. **DO NOT manually configure run configurations through IDE GUI** - The provided files handle this automatically
+2. **Always use the pre-configured run configurations** - They ensure the correct environment files are used
+3. **Both `.run/` and `.vscode/` directories should be committed** - They contain shared team configurations
+4. **Default configuration uses Dev environment** - Ensures development-friendly defaults
+5. **To switch environments**: Simply select a different configuration from the dropdown - no manual editing needed
+
+##### Configuration File Locations
+
+```
+project_root/
+├── .run/                      # Android Studio run configurations
+│   ├── Dev.run.xml           # Dev environment (default)
+│   ├── Release.run.xml       # Release environment
+│   └── Special Dev.run.xml   # Special dev environment
+└── .vscode/                   # VS Code/Cursor launch configurations
+    └── launch.json           # Contains all VS Code run configurations
+```
+
+**Why This Matters:**
+- Ensures all developers use the same environment configurations
+- Prevents configuration drift between team members
+- Eliminates manual setup steps for new developers
+- Reduces errors from incorrect environment file usage
+- Makes it easy to switch between environments
+
 ---
 
 ## Starter Kit System
