@@ -1,7 +1,6 @@
-import 'package:dartz/dartz';
+import 'package:dartz/dartz.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 
-import '../../../../../core/error/exceptions.dart';
 import '../../../../../core/error/failure.dart';
 import '../../domain/repositories/push_notifications_repository.dart';
 
@@ -42,7 +41,7 @@ class OneSignalPushNotificationsRepositoryImpl
   @override
   Future<Either<Failure, void>> setEmail(String email) async {
     try {
-      OneSignal.User.pushSubscription.setEmail(email);
+      OneSignal.User.addEmail(email);
       return const Right(null);
     } catch (e) {
       return Left(UnknownFailure(message: e.toString()));
@@ -62,7 +61,7 @@ class OneSignalPushNotificationsRepositoryImpl
   @override
   Future<Either<Failure, void>> sendTag(String key, String value) async {
     try {
-      OneSignal.User.pushSubscription.addTag(key, value);
+      OneSignal.User.addTags({key: value});
       return const Right(null);
     } catch (e) {
       return Left(UnknownFailure(message: e.toString()));
@@ -72,7 +71,7 @@ class OneSignalPushNotificationsRepositoryImpl
   @override
   Future<Either<Failure, void>> sendTags(Map<String, String> tags) async {
     try {
-      OneSignal.User.pushSubscription.addTags(tags);
+      OneSignal.User.addTags(tags);
       return const Right(null);
     } catch (e) {
       return Left(UnknownFailure(message: e.toString()));
@@ -82,7 +81,7 @@ class OneSignalPushNotificationsRepositoryImpl
   @override
   Future<Either<Failure, void>> deleteTag(String key) async {
     try {
-      OneSignal.User.pushSubscription.removeTag(key);
+      OneSignal.User.removeTag(key);
       return const Right(null);
     } catch (e) {
       return Left(UnknownFailure(message: e.toString()));
@@ -92,7 +91,9 @@ class OneSignalPushNotificationsRepositoryImpl
   @override
   Future<Either<Failure, void>> deleteTags(List<String> keys) async {
     try {
-      OneSignal.User.pushSubscription.removeTags(keys);
+      for (final key in keys) {
+        OneSignal.User.removeTag(key);
+      }
       return const Right(null);
     } catch (e) {
       return Left(UnknownFailure(message: e.toString()));

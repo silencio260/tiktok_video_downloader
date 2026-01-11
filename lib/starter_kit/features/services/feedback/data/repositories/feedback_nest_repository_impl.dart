@@ -1,4 +1,4 @@
-import 'package:dartz/dartz';
+import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 
 import '../../../../../core/error/exceptions.dart';
