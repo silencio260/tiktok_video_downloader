@@ -23,7 +23,13 @@ class AdsConfig {
   });
 
   /// Factory for development with test IDs
-  factory AdsConfig.test() => const AdsConfig();
+  factory AdsConfig.test() => const AdsConfig(
+    bannerAdUnitId: 'ca-app-pub-3940256099942544/6300978111',
+    interstitialAdUnitId: 'ca-app-pub-3940256099942544/1033173712',
+    rewardedAdUnitId: 'ca-app-pub-3940256099942544/5224354917',
+    nativeAdUnitId: 'ca-app-pub-3940256099942544/2247696110',
+    appOpenAdUnitId: 'ca-app-pub-3940256099942544/3419835294',
+  );
 }
 
 /// Abstract repository for Ad operations

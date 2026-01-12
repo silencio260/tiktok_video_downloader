@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../../../starter_kit.dart';
+import '../../../../../src/config/environment_vars.dart';
 import '../bloc/ads_bloc.dart';
 
 class NativeAdWidget extends StatefulWidget {
@@ -28,6 +30,7 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
   String? _currentAdUnitId;
   int _retryCount = 0;
   static const int _maxRetries = 2;
+  TemplateType _currentTemplateType = TemplateType.medium;
 
   @override
   void didChangeDependencies() {
@@ -44,6 +47,7 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
         adUnitId != _currentAdUnitId) {
       _currentAdUnitId = adUnitId;
       _retryCount = 0;
+      _currentTemplateType = TemplateType.medium;
       _loadAd(adUnitId);
     }
   }
@@ -81,6 +85,15 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
             // Retry logic for No Fill (3) or Internal Error (0)
             if (_retryCount < _maxRetries) {
               _retryCount++;
+
+              // If medium fails with internal error, try small template
+              if (_currentTemplateType == TemplateType.medium) {
+                _currentTemplateType = TemplateType.small;
+                debugPrint(
+                  'NativeAdWidget: Switching to Small template for retry',
+                );
+              }
+
               debugPrint(
                 'NativeAdWidget: Retrying load (attempt $_retryCount)...',
               );
@@ -96,14 +109,29 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
       nativeTemplateStyle:
           widget.templateStyle ??
           NativeTemplateStyle(
-            templateType: TemplateType.medium,
-            mainBackgroundColor: Colors.white,
-            cornerRadius: 10.0,
+            templateType: _currentTemplateType,
+            mainBackgroundColor: const Color(0xFF1E1E1E),
+            cornerRadius: 15.0,
             callToActionTextStyle: NativeTemplateTextStyle(
               textColor: Colors.white,
-              backgroundColor: Colors.blue,
-              style: NativeTemplateFontStyle.normal,
+              backgroundColor: const Color(0xFF3B82F6),
+              style: NativeTemplateFontStyle.bold,
               size: 16.0,
+            ),
+            primaryTextStyle: NativeTemplateTextStyle(
+              textColor: Colors.white,
+              style: NativeTemplateFontStyle.bold,
+              size: 16.0,
+            ),
+            secondaryTextStyle: NativeTemplateTextStyle(
+              textColor: Colors.white70,
+              style: NativeTemplateFontStyle.normal,
+              size: 14.0,
+            ),
+            tertiaryTextStyle: NativeTemplateTextStyle(
+              textColor: Colors.white60,
+              style: NativeTemplateFontStyle.normal,
+              size: 12.0,
             ),
           ),
     )..load();
@@ -134,7 +162,27 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
         }
 
         if (_nativeAd == null || !_isLoaded) {
-          return const SizedBox.shrink();
+          // Only show loading placeholder in debug/dev mode
+          if (kDebugMode || EnvironmentsVar.isDeveloperMode) {
+            return Container(
+              margin: const EdgeInsets.symmetric(vertical: 10),
+              width: widget.width ?? 320,
+              height: widget.height ?? 150,
+              decoration: BoxDecoration(
+                color: const Color(0xFF1E1E1E),
+                borderRadius: BorderRadius.circular(15),
+                border: Border.all(color: Colors.white.withOpacity(0.05)),
+              ),
+              child: const Center(
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white24),
+                ),
+              ),
+            );
+          } else {
+            return const SizedBox.shrink();
+          }
         }
 
         return Container(
