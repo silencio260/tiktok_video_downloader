@@ -20,6 +20,8 @@ class AdsBloc extends Bloc<AdsEvent, AdsState> {
   final ShowAppOpenUseCase showAppOpenUseCase;
   final void Function(AdRevenueEvent)? onPaidEvent;
 
+  AdsConfig? _currentConfig;
+
   AdsBloc({
     required this.adsRepository,
     required this.showInterstitialUseCase,
@@ -41,11 +43,13 @@ class AdsBloc extends Bloc<AdsEvent, AdsState> {
     AdsInitialize event,
     Emitter<AdsState> emit,
   ) async {
-    emit(const AdsLoading());
+    _currentConfig = event.config;
+    emit(AdsLoading(config: _currentConfig));
     final result = await adsRepository.initialize(event.config);
     result.fold(
-      (failure) => emit(AdsError(message: failure.message)),
-      (_) => emit(const AdsInitialized()),
+      (failure) =>
+          emit(AdsError(message: failure.message, config: _currentConfig)),
+      (_) => emit(AdsInitialized(config: _currentConfig)),
     );
   }
 
@@ -54,12 +58,14 @@ class AdsBloc extends Bloc<AdsEvent, AdsState> {
     Emitter<AdsState> emit,
   ) async {
     final result = await adsRepository.loadInterstitial(event.adUnitId);
-    result.fold((failure) => emit(AdsError(message: failure.message)), (
-      _,
-    ) async {
-      final ready = await _checkReadyStatus();
-      emit(ready);
-    });
+    result.fold(
+      (failure) =>
+          emit(AdsError(message: failure.message, config: _currentConfig)),
+      (_) async {
+        final ready = await _checkReadyStatus();
+        emit(ready);
+      },
+    );
   }
 
   Future<void> _onShowInterstitial(
@@ -67,11 +73,17 @@ class AdsBloc extends Bloc<AdsEvent, AdsState> {
     Emitter<AdsState> emit,
   ) async {
     final result = await showInterstitialUseCase();
-    result.fold((failure) => emit(AdsError(message: failure.message)), (shown) {
-      if (shown) {
-        emit(const AdsShowSuccess(type: AdType.interstitial));
-      }
-    });
+    result.fold(
+      (failure) =>
+          emit(AdsError(message: failure.message, config: _currentConfig)),
+      (shown) {
+        if (shown) {
+          emit(
+            AdsShowSuccess(type: AdType.interstitial, config: _currentConfig),
+          );
+        }
+      },
+    );
   }
 
   Future<void> _onLoadRewarded(
@@ -79,12 +91,14 @@ class AdsBloc extends Bloc<AdsEvent, AdsState> {
     Emitter<AdsState> emit,
   ) async {
     final result = await adsRepository.loadRewarded(event.adUnitId);
-    result.fold((failure) => emit(AdsError(message: failure.message)), (
-      _,
-    ) async {
-      final ready = await _checkReadyStatus();
-      emit(ready);
-    });
+    result.fold(
+      (failure) =>
+          emit(AdsError(message: failure.message, config: _currentConfig)),
+      (_) async {
+        final ready = await _checkReadyStatus();
+        emit(ready);
+      },
+    );
   }
 
   Future<void> _onShowRewarded(
@@ -93,8 +107,15 @@ class AdsBloc extends Bloc<AdsEvent, AdsState> {
   ) async {
     final result = await showRewardedUseCase();
     result.fold(
-      (failure) => emit(AdsError(message: failure.message)),
-      (reward) => emit(AdsShowSuccess(type: AdType.rewarded, reward: reward)),
+      (failure) =>
+          emit(AdsError(message: failure.message, config: _currentConfig)),
+      (reward) => emit(
+        AdsShowSuccess(
+          type: AdType.rewarded,
+          reward: reward,
+          config: _currentConfig,
+        ),
+      ),
     );
   }
 
@@ -103,12 +124,14 @@ class AdsBloc extends Bloc<AdsEvent, AdsState> {
     Emitter<AdsState> emit,
   ) async {
     final result = await adsRepository.loadAppOpen(event.adUnitId);
-    result.fold((failure) => emit(AdsError(message: failure.message)), (
-      _,
-    ) async {
-      final ready = await _checkReadyStatus();
-      emit(ready);
-    });
+    result.fold(
+      (failure) =>
+          emit(AdsError(message: failure.message, config: _currentConfig)),
+      (_) async {
+        final ready = await _checkReadyStatus();
+        emit(ready);
+      },
+    );
   }
 
   Future<void> _onShowAppOpen(
@@ -116,11 +139,15 @@ class AdsBloc extends Bloc<AdsEvent, AdsState> {
     Emitter<AdsState> emit,
   ) async {
     final result = await showAppOpenUseCase();
-    result.fold((failure) => emit(AdsError(message: failure.message)), (shown) {
-      if (shown) {
-        emit(const AdsShowSuccess(type: AdType.appOpen));
-      }
-    });
+    result.fold(
+      (failure) =>
+          emit(AdsError(message: failure.message, config: _currentConfig)),
+      (shown) {
+        if (shown) {
+          emit(AdsShowSuccess(type: AdType.appOpen, config: _currentConfig));
+        }
+      },
+    );
   }
 
   Future<void> _onLoadNative(
@@ -128,12 +155,14 @@ class AdsBloc extends Bloc<AdsEvent, AdsState> {
     Emitter<AdsState> emit,
   ) async {
     final result = await adsRepository.loadNative(event.adUnitId);
-    result.fold((failure) => emit(AdsError(message: failure.message)), (
-      _,
-    ) async {
-      final ready = await _checkReadyStatus();
-      emit(ready);
-    });
+    result.fold(
+      (failure) =>
+          emit(AdsError(message: failure.message, config: _currentConfig)),
+      (_) async {
+        final ready = await _checkReadyStatus();
+        emit(ready);
+      },
+    );
   }
 
   Future<AdsReady> _checkReadyStatus() async {
@@ -147,6 +176,7 @@ class AdsBloc extends Bloc<AdsEvent, AdsState> {
       isRewardedReady: rewarded.getOrElse(() => false),
       isAppOpenReady: appOpen.getOrElse(() => false),
       isNativeReady: native.getOrElse(() => false),
+      config: _currentConfig,
     );
   }
 }

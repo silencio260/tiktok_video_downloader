@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'src/config/environment_vars.dart';
 import 'starter_kit/starter_kit.dart';
 import 'starter_kit/features/ads/domain/repositories/ads_repository.dart';
 import 'starter_kit/features/ads/presentation/bloc/ads_bloc.dart';
@@ -9,32 +8,58 @@ import 'starter_kit/features/analytics/presentation/bloc/analytics_event.dart';
 import 'starter_kit/features/services/push_notifications/domain/repositories/push_notifications_repository.dart';
 
 /// Initialize StarterKit with all features
-Future<void> initializeStarterKit() async {
-  await _initializeStarterKitCore();
-  await _initializePostHog();
+Future<void> initializeStarterKit({
+  required String supportEmail,
+  String? posthogApiKey,
+  String? posthogHost,
+  String? feedbackNestApiKey,
+  AdsConfig? adsConfig,
+  String? oneSignalAppId,
+}) async {
+  await _initializeStarterKitCore(
+    posthogApiKey: posthogApiKey,
+    feedbackNestApiKey: feedbackNestApiKey,
+    supportEmail: supportEmail,
+  );
+  await _initializePostHog(
+    posthogApiKey: posthogApiKey,
+    posthogHost: posthogHost,
+  );
   _initializeAnalytics();
-  await _initializeAds();
-  await _initializeOneSignal();
+  await _initializeAds(adsConfig: adsConfig);
+  await _initializeOneSignal(oneSignalAppId: oneSignalAppId);
 }
 
 /// Initialize StarterKit core (Analytics, Ads, IAP, Services)
-Future<void> _initializeStarterKitCore() async {
+Future<void> _initializeStarterKitCore({
+  String? posthogApiKey,
+  String? feedbackNestApiKey,
+  required String supportEmail,
+}) async {
   await StarterKit.initialize(
-    postHogDataSource: EnvironmentsVar.hasPosthog
-        ? PostHogRemoteDataSourceImpl()
-        : null,
-    feedbackNestApiKey: EnvironmentsVar.feedBackNestApiKey.isNotEmpty
-        ? EnvironmentsVar.feedBackNestApiKey
-        : null,
+    postHogDataSource:
+        (posthogApiKey != null && posthogApiKey.isNotEmpty)
+            ? PostHogRemoteDataSourceImpl()
+            : null,
+    feedbackNestApiKey:
+        (feedbackNestApiKey != null && feedbackNestApiKey.isNotEmpty)
+            ? feedbackNestApiKey
+            : null,
+    supportEmail: supportEmail,
   );
 }
 
 /// Initialize PostHog Analytics
-Future<void> _initializePostHog() async {
-  if (EnvironmentsVar.hasPosthog && StarterKit.postHog != null) {
+Future<void> _initializePostHog({
+  String? posthogApiKey,
+  String? posthogHost,
+}) async {
+  if (posthogApiKey != null &&
+      posthogApiKey.isNotEmpty &&
+      StarterKit.postHog != null) {
     await StarterKit.postHog!.initialize(
-      apiKey: EnvironmentsVar.posthogApiKey,
-      host: 'https://app.posthog.com',
+      apiKey: posthogApiKey,
+      host: posthogHost ?? 'https://app.posthog.com',
     );
   }
 }
@@ -44,43 +69,19 @@ void _initializeAnalytics() {
   StarterKit.analyticsBloc.add(const AnalyticsInitialize());
 }
 
-/// Initialize Ads with ad unit IDs from environment variables
-Future<void> _initializeAds() async {
-  if (EnvironmentsVar.bannerAdId.isNotEmpty ||
-      EnvironmentsVar.interstitialAdId.isNotEmpty ||
-      EnvironmentsVar.rewardedAdId.isNotEmpty ||
-      EnvironmentsVar.appOpenAdId.isNotEmpty ||
-      EnvironmentsVar.nativeAdId.isNotEmpty) {
-    StarterKit.adsBloc.add(
-      AdsInitialize(
-        config: AdsConfig(
-          bannerAdUnitId: EnvironmentsVar.bannerAdId.isNotEmpty
-              ? EnvironmentsVar.bannerAdId
-              : null,
-          interstitialAdUnitId: EnvironmentsVar.interstitialAdId.isNotEmpty
-              ? EnvironmentsVar.interstitialAdId
-              : null,
-          rewardedAdUnitId: EnvironmentsVar.rewardedAdId.isNotEmpty
-              ? EnvironmentsVar.rewardedAdId
-              : null,
-          appOpenAdUnitId: EnvironmentsVar.appOpenAdId.isNotEmpty
-              ? EnvironmentsVar.appOpenAdId
-              : null,
-          nativeAdUnitId: EnvironmentsVar.nativeAdId.isNotEmpty
-              ? EnvironmentsVar.nativeAdId
-              : null,
-        ),
-      ),
-    );
+/// Initialize Ads with ad unit IDs
+Future<void> _initializeAds({AdsConfig? adsConfig}) async {
+  if (adsConfig != null) {
+    StarterKit.adsBloc.add(AdsInitialize(config: adsConfig));
   }
 }
 
 /// Initialize OneSignal Push Notifications
-Future<void> _initializeOneSignal() async {
-  if (EnvironmentsVar.hasOneSignal) {
+Future<void> _initializeOneSignal({String? oneSignalAppId}) async {
+  if (oneSignalAppId != null && oneSignalAppId.isNotEmpty) {
     try {
       final pushRepo = StarterKit.sl<PushNotificationsRepository>();
-      await pushRepo.initialize(EnvironmentsVar.oneSignalAppId);
+      await pushRepo.initialize(oneSignalAppId);
     } catch (e) {
       // Log error but don't crash the app
       debugPrint('OneSignal initialization error: $e');

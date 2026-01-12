@@ -7,6 +7,8 @@ import 'src/container_injector.dart';
 import 'src/my_app.dart';
 import 'starterkit_init.dart';
 import 'firebase_options.dart';
+import 'src/config/environment_vars.dart';
+import 'starter_kit/features/ads/domain/repositories/ads_repository.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,7 +26,36 @@ void main() async {
   }
 
   // Initialize StarterKit
-  await initializeStarterKit();
+  await initializeStarterKit(
+    supportEmail:
+        'support@gentech.com', // Replace with your actual support email
+    posthogApiKey: EnvironmentsVar.posthogApiKey,
+    posthogHost: 'https://app.posthog.com',
+    feedbackNestApiKey: EnvironmentsVar.feedBackNestApiKey,
+    oneSignalAppId: EnvironmentsVar.oneSignalAppId,
+    adsConfig: AdsConfig(
+      bannerAdUnitId:
+          EnvironmentsVar.bannerAdId.isNotEmpty
+              ? EnvironmentsVar.bannerAdId
+              : null,
+      interstitialAdUnitId:
+          EnvironmentsVar.interstitialAdId.isNotEmpty
+              ? EnvironmentsVar.interstitialAdId
+              : null,
+      rewardedAdUnitId:
+          EnvironmentsVar.rewardedAdId.isNotEmpty
+              ? EnvironmentsVar.rewardedAdId
+              : null,
+      appOpenAdUnitId:
+          EnvironmentsVar.appOpenAdId.isNotEmpty
+              ? EnvironmentsVar.appOpenAdId
+              : null,
+      nativeAdUnitId:
+          EnvironmentsVar.nativeAdId.isNotEmpty
+              ? EnvironmentsVar.nativeAdId
+              : null,
+    ),
+  );
 
   // Initialize app dependencies
   initApp();

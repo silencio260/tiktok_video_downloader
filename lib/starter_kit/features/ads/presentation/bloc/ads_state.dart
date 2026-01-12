@@ -1,22 +1,23 @@
 part of 'ads_bloc.dart';
 
 abstract class AdsState extends Equatable {
-  const AdsState();
+  final AdsConfig? config;
+  const AdsState({this.config});
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [config];
 }
 
 class AdsInitial extends AdsState {
-  const AdsInitial();
+  const AdsInitial({super.config});
 }
 
 class AdsLoading extends AdsState {
-  const AdsLoading();
+  const AdsLoading({super.config});
 }
 
 class AdsInitialized extends AdsState {
-  const AdsInitialized();
+  const AdsInitialized({super.config});
 }
 
 class AdsReady extends AdsState {
@@ -30,32 +31,34 @@ class AdsReady extends AdsState {
     this.isRewardedReady = false,
     this.isAppOpenReady = false,
     this.isNativeReady = false,
+    super.config,
   });
 
   @override
   List<Object?> get props => [
-        isInterstitialReady,
-        isRewardedReady,
-        isAppOpenReady,
-        isNativeReady,
-      ];
+    ...super.props,
+    isInterstitialReady,
+    isRewardedReady,
+    isAppOpenReady,
+    isNativeReady,
+  ];
 }
 
 class AdsShowSuccess extends AdsState {
   final AdType type;
   final AdReward? reward;
 
-  const AdsShowSuccess({required this.type, this.reward});
+  const AdsShowSuccess({required this.type, this.reward, super.config});
 
   @override
-  List<Object?> get props => [type, reward];
+  List<Object?> get props => [...super.props, type, reward];
 }
 
 class AdsError extends AdsState {
   final String message;
 
-  const AdsError({required this.message});
+  const AdsError({required this.message, super.config});
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [...super.props, message];
 }

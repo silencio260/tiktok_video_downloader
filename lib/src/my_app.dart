@@ -5,6 +5,8 @@ import 'config/routes_manager.dart';
 import 'config/theme_manager.dart';
 import 'container_injector.dart';
 import 'features/tiktok_downloader/presentation/bloc/downloader_bloc/downloader_bloc.dart';
+import '../starter_kit/starter_kit.dart';
+import 'config/environment_vars.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -13,11 +15,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => sl<DownloaderBloc>(),
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        initialRoute: Routes.splash,
-        onGenerateRoute: AppRouter.getRoute,
-        theme: getAppTheme(),
+      child: StarterKit.postHogWrapper(
+        apiKey: EnvironmentsVar.posthogApiKey,
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          initialRoute: Routes.splash,
+          onGenerateRoute: AppRouter.getRoute,
+          theme: getAppTheme(),
+        ),
       ),
     );
   }

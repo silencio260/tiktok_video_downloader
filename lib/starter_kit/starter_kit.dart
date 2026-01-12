@@ -17,6 +17,10 @@ import 'features/onboarding/presentation/onboarding_view.dart';
 import 'features/services/services_injector.dart';
 import 'features/settings/domain/models/settings_models.dart';
 import 'features/settings/presentation/settings_view.dart';
+import 'features/ads/presentation/widgets/banner_ad_widget.dart';
+import 'features/ads/presentation/widgets/native_ad_widget.dart';
+import 'features/analytics/presentation/widgets/posthog_wrapper.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 /// The Facade for the Starter Kit Plugin
 ///
@@ -29,12 +33,12 @@ class StarterKit {
 
   /// Initialize the Starter Kit
   static Future<void> initialize({
+    required String supportEmail,
+    String? feedbackNestApiKey,
     IapRemoteDataSource? iapDataSource,
     AdsRemoteDataSource? adsDataSource,
     List<AnalyticsRemoteDataSource>? analyticsDataSources,
     PostHogRemoteDataSource? postHogDataSource,
-    String? supportEmail,
-    String? feedbackNestApiKey,
   }) async {
     // Analytics & PostHog
     initAnalyticsFeature(
@@ -58,7 +62,7 @@ class StarterKit {
     // Services
     initServicesFeature(
       _sl,
-      supportEmail: supportEmail ?? 'support@example.com',
+      supportEmail: supportEmail,
       feedbackNestApiKey: feedbackNestApiKey,
     );
   }
@@ -115,6 +119,38 @@ class StarterKit {
       templateType: template,
       pageTitle: title,
       backgroundColor: backgroundColor,
+    );
+  }
+
+  // --- Widget Builders ---
+
+  /// Build a Banner Ad Widget
+  static Widget bannerAd({AdSize adSize = AdSize.banner, String? adUnitId}) {
+    return BannerAdWidget(adSize: adSize, adUnitId: adUnitId);
+  }
+
+  /// Build a Native Ad Widget
+  static Widget nativeAd({
+    String? adUnitId,
+    NativeTemplateStyle? templateStyle,
+  }) {
+    return NativeAdWidget(adUnitId: adUnitId, templateStyle: templateStyle);
+  }
+
+  /// Build a PostHog Wrapper
+  static Widget postHogWrapper({
+    required Widget child,
+    required String apiKey,
+    String host = 'https://app.posthog.com',
+    bool captureLocalStorage = false,
+    bool captureApplicationLifecycleEvents = true,
+  }) {
+    return PostHogWrapper(
+      apiKey: apiKey,
+      host: host,
+      captureLocalStorage: captureLocalStorage,
+      captureApplicationLifecycleEvents: captureApplicationLifecycleEvents,
+      child: child,
     );
   }
 }
