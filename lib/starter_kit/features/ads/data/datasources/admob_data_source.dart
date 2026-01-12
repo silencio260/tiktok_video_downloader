@@ -272,6 +272,7 @@ class AdMobDataSource implements AdsRemoteDataSource {
 
     // Native ad will be loaded and managed by widgets
     // This method returns a placeholder to indicate the ad unit is ready
+    print('---------------> Load Native Ads');
     completer.complete(
       AdUnit(id: adUnitId, type: AdType.native, isLoaded: true),
     );

@@ -21,6 +21,9 @@ class AdsConfig {
     this.appOpenAdUnitId,
     this.testDeviceIds = const [],
   });
+
+  /// Factory for development with test IDs
+  factory AdsConfig.test() => const AdsConfig();
 }
 
 /// Abstract repository for Ad operations

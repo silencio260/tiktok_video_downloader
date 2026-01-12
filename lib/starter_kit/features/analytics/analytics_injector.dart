@@ -32,7 +32,7 @@ void initAnalyticsFeature(
   );
 
   // Bloc
-  sl.registerFactory<AnalyticsBloc>(
+  sl.registerLazySingleton<AnalyticsBloc>(
     () => AnalyticsBloc(
       repository: sl(),
       logEventUseCase: sl(),

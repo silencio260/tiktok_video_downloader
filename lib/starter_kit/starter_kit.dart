@@ -133,8 +133,15 @@ class StarterKit {
   static Widget nativeAd({
     String? adUnitId,
     NativeTemplateStyle? templateStyle,
+    double? width,
+    double? height,
   }) {
-    return NativeAdWidget(adUnitId: adUnitId, templateStyle: templateStyle);
+    return NativeAdWidget(
+      adUnitId: adUnitId,
+      templateStyle: templateStyle,
+      width: width,
+      height: height,
+    );
   }
 
   /// Build a PostHog Wrapper

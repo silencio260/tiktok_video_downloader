@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -33,28 +34,32 @@ void main() async {
     posthogHost: 'https://app.posthog.com',
     feedbackNestApiKey: EnvironmentsVar.feedBackNestApiKey,
     oneSignalAppId: EnvironmentsVar.oneSignalAppId,
-    adsConfig: AdsConfig(
-      bannerAdUnitId:
-          EnvironmentsVar.bannerAdId.isNotEmpty
-              ? EnvironmentsVar.bannerAdId
-              : null,
-      interstitialAdUnitId:
-          EnvironmentsVar.interstitialAdId.isNotEmpty
-              ? EnvironmentsVar.interstitialAdId
-              : null,
-      rewardedAdUnitId:
-          EnvironmentsVar.rewardedAdId.isNotEmpty
-              ? EnvironmentsVar.rewardedAdId
-              : null,
-      appOpenAdUnitId:
-          EnvironmentsVar.appOpenAdId.isNotEmpty
-              ? EnvironmentsVar.appOpenAdId
-              : null,
-      nativeAdUnitId:
-          EnvironmentsVar.nativeAdId.isNotEmpty
-              ? EnvironmentsVar.nativeAdId
-              : null,
-    ),
+    adsConfig:
+        (kDebugMode || EnvironmentsVar.isDeveloperMode) &&
+                EnvironmentsVar.nativeAdId.isEmpty
+            ? AdsConfig.test()
+            : AdsConfig(
+              bannerAdUnitId:
+                  EnvironmentsVar.bannerAdId.isNotEmpty
+                      ? EnvironmentsVar.bannerAdId
+                      : null,
+              interstitialAdUnitId:
+                  EnvironmentsVar.interstitialAdId.isNotEmpty
+                      ? EnvironmentsVar.interstitialAdId
+                      : null,
+              rewardedAdUnitId:
+                  EnvironmentsVar.rewardedAdId.isNotEmpty
+                      ? EnvironmentsVar.rewardedAdId
+                      : null,
+              appOpenAdUnitId:
+                  EnvironmentsVar.appOpenAdId.isNotEmpty
+                      ? EnvironmentsVar.appOpenAdId
+                      : null,
+              nativeAdUnitId:
+                  EnvironmentsVar.nativeAdId.isNotEmpty
+                      ? EnvironmentsVar.nativeAdId
+                      : null,
+            ),
   );
 
   // Initialize app dependencies

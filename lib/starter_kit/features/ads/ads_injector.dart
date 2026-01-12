@@ -43,7 +43,7 @@ void initAdsFeature(
   );
 
   // Bloc
-  sl.registerFactory<AdsBloc>(
+  sl.registerLazySingleton<AdsBloc>(
     () => AdsBloc(
       adsRepository: sl(),
       showInterstitialUseCase: sl(),

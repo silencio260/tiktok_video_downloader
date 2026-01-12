@@ -41,7 +41,7 @@ void initIapFeature(GetIt sl, {IapRemoteDataSource? customDataSource}) {
   );
 
   // Bloc
-  sl.registerFactory<IapBloc>(
+  sl.registerLazySingleton<IapBloc>(
     () => IapBloc(
       getSubscriptionStatusUseCase: sl(),
       getProductsUseCase: sl(),

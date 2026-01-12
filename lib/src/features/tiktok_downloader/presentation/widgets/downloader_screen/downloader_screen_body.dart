@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tiktok_video_downloader/src/core/utils/app_colors.dart';
 import '../../../../../core/utils/app_strings.dart';
+import '../../../../../../starter_kit/starter_kit.dart';
 
 import '../../../../../config/routes_manager.dart';
 import '../../../../../core/utils/app_enums.dart';
@@ -164,10 +165,11 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
                           state is DownloaderSaveVideoLoading ||
                           state is DownloaderSaveVideoProgress
                       ? CenterProgressIndicator(
-                          percentage: state is DownloaderSaveVideoProgress
-                              ? state.percent
-                              : null,
-                        )
+                        percentage:
+                            state is DownloaderSaveVideoProgress
+                                ? state.percent
+                                : null,
+                      )
                       : _buildBodyDownloadBtn(context),
                   const SizedBox(height: 32),
                   Align(
@@ -182,6 +184,8 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
                   ),
                   const SizedBox(height: 16),
                   _buildQuickActions(),
+                  const SizedBox(height: 24),
+                  StarterKit.nativeAd(),
                   const SizedBox(height: 40),
                   _buildRecentDownloadsSection(context),
                   const SizedBox(height: 20),
@@ -316,9 +320,8 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
   Widget _buildRecentDownloadsSection(BuildContext context) {
     return BlocBuilder<DownloaderBloc, DownloaderState>(
       builder: (context, state) {
-        final List<VideoItem> recentDownloads = context
-            .read<DownloaderBloc>()
-            .oldDownloads;
+        final List<VideoItem> recentDownloads =
+            context.read<DownloaderBloc>().oldDownloads;
 
         if (recentDownloads.isEmpty) {
           return const SizedBox.shrink();
@@ -341,8 +344,8 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
                   ),
                 ),
                 TextButton(
-                  onPressed: () =>
-                      Navigator.of(context).pushNamed(Routes.downloads),
+                  onPressed:
+                      () => Navigator.of(context).pushNamed(Routes.downloads),
                   child: const Text(
                     "View All",
                     style: TextStyle(
@@ -369,9 +372,10 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: InkWell(
-        onTap: () => Navigator.of(
-          context,
-        ).pushNamed(Routes.viewVideo, arguments: item.path),
+        onTap:
+            () => Navigator.of(
+              context,
+            ).pushNamed(Routes.viewVideo, arguments: item.path),
         borderRadius: BorderRadius.circular(12),
         child: Row(
           children: [
@@ -381,19 +385,21 @@ class _DownloaderScreenBodyState extends State<DownloaderScreenBody> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 color: AppColors.cardColor,
-                image: item.thumbnailPath != null
-                    ? DecorationImage(
-                        image: FileImage(File(item.thumbnailPath!)),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
+                image:
+                    item.thumbnailPath != null
+                        ? DecorationImage(
+                          image: FileImage(File(item.thumbnailPath!)),
+                          fit: BoxFit.cover,
+                        )
+                        : null,
               ),
-              child: item.thumbnailPath == null
-                  ? const Icon(
-                      Icons.video_file_outlined,
-                      color: AppColors.white,
-                    )
-                  : null,
+              child:
+                  item.thumbnailPath == null
+                      ? const Icon(
+                        Icons.video_file_outlined,
+                        color: AppColors.white,
+                      )
+                      : null,
             ),
             const SizedBox(width: 16),
             Expanded(
