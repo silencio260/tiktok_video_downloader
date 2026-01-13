@@ -10,6 +10,10 @@ class RemoteConfigRepositoryImpl implements RemoteConfigRepository {
   RemoteConfigRepositoryImpl({required this.dataSource});
 
   @override
+  Future<void> setDefaults(Map<String, dynamic> defaults) async {
+    await dataSource.setDefaults(defaults);
+  }
+
   Future<Either<Failure, void>> fetchAndActivate() async {
     try {
       await dataSource.fetchAndActivate();

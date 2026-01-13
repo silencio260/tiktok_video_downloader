@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 
 import 'starter_kit/starter_kit.dart';
 import 'starter_kit/features/ads/domain/repositories/ads_repository.dart';
-import 'starter_kit/features/ads/presentation/bloc/ads_bloc.dart';
 import 'starter_kit/features/analytics/data/datasources/posthog_remote_data_source.dart';
 import 'starter_kit/features/analytics/presentation/bloc/analytics_event.dart';
 import 'starter_kit/features/services/push_notifications/domain/repositories/push_notifications_repository.dart';
+import 'starter_kit/features/services/remote_config/domain/repositories/remote_config_repository.dart';
+import 'starter_kit/features/ads/presentation/bloc/ads_bloc.dart';
 
 /// Initialize StarterKit with all features
 Future<void> initializeStarterKit({
@@ -15,19 +16,62 @@ Future<void> initializeStarterKit({
   String? feedbackNestApiKey,
   AdsConfig? adsConfig,
   String? oneSignalAppId,
+  Map<String, dynamic>? remoteConfigDefaults,
 }) async {
   await _initializeStarterKitCore(
     posthogApiKey: posthogApiKey,
     feedbackNestApiKey: feedbackNestApiKey,
     supportEmail: supportEmail,
   );
+
+  // Fetch and activate Remote Config
+  final remoteConfig = StarterKit.sl<RemoteConfigRepository>();
+  if (remoteConfigDefaults != null) {
+    await remoteConfig.setDefaults(remoteConfigDefaults);
+  }
+  await remoteConfig.fetchAndActivate();
+
+  // Merge Remote Config with provided AdsConfig
+  final finalAdsConfig = _getAdsConfigFromRemoteConfig(adsConfig);
+
   await _initializePostHog(
     posthogApiKey: posthogApiKey,
     posthogHost: posthogHost,
   );
   _initializeAnalytics();
-  await _initializeAds(adsConfig: adsConfig);
+  await _initializeAds(adsConfig: finalAdsConfig);
   await _initializeOneSignal(oneSignalAppId: oneSignalAppId);
+}
+
+/// Helper to build AdsConfig from Remote Config with fallback to provided config
+AdsConfig _getAdsConfigFromRemoteConfig(AdsConfig? baseConfig) {
+  final rc = StarterKit.sl<RemoteConfigRepository>();
+
+  // Helper to get RC string or fallback
+  String? getRCString(String key, String? fallback) {
+    final value = rc.getString(key);
+    return value.isNotEmpty ? value : fallback;
+  }
+
+  return AdsConfig(
+    bannerAdUnitId: getRCString('banner_ad_id', baseConfig?.bannerAdUnitId),
+    interstitialAdUnitId: getRCString(
+      'interstitial_ad_id',
+      baseConfig?.interstitialAdUnitId,
+    ),
+    rewardedAdUnitId: getRCString(
+      'rewarded_ad_id',
+      baseConfig?.rewardedAdUnitId,
+    ),
+    minInterstitialInterval: rc.getInt('min_insta_ad_interval'),
+    minRewardedInterval: rc.getInt('min_rewarded_ad_interval'),
+    minNativeInterval: rc.getInt('min_native_interval'),
+    minAppOpenInterval: rc.getInt('min_app_open_ad'),
+    minBannerInterval: rc.getInt('min_banner_ad_interval'),
+    shouldShowAppOpenAd: rc.getBool('should_show_app_open_ad'),
+    timeBeforeFirstInstaAd: rc.getInt('time_before_first_insta_ad'),
+    timeBeforeFirstRewardedAd: rc.getInt('time_before_first_rewared_ad'),
+  );
 }
 
 /// Initialize StarterKit core (Analytics, Ads, IAP, Services)

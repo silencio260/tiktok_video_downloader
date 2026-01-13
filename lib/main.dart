@@ -28,38 +28,43 @@ void main() async {
 
   // Initialize StarterKit
   await initializeStarterKit(
-    supportEmail:
-        'support@gentech.com', // Replace with your actual support email
+    supportEmail: 'support@gentech.com',
     posthogApiKey: EnvironmentsVar.posthogApiKey,
     posthogHost: 'https://app.posthog.com',
     feedbackNestApiKey: EnvironmentsVar.feedBackNestApiKey,
     oneSignalAppId: EnvironmentsVar.oneSignalAppId,
-    adsConfig:
-        (kDebugMode || EnvironmentsVar.isDeveloperMode) &&
-                EnvironmentsVar.nativeAdId.isEmpty
-            ? AdsConfig.test()
-            : AdsConfig(
-              bannerAdUnitId:
-                  EnvironmentsVar.bannerAdId.isNotEmpty
-                      ? EnvironmentsVar.bannerAdId
-                      : null,
-              interstitialAdUnitId:
-                  EnvironmentsVar.interstitialAdId.isNotEmpty
-                      ? EnvironmentsVar.interstitialAdId
-                      : null,
-              rewardedAdUnitId:
-                  EnvironmentsVar.rewardedAdId.isNotEmpty
-                      ? EnvironmentsVar.rewardedAdId
-                      : null,
-              appOpenAdUnitId:
-                  EnvironmentsVar.appOpenAdId.isNotEmpty
-                      ? EnvironmentsVar.appOpenAdId
-                      : null,
-              nativeAdUnitId:
-                  EnvironmentsVar.nativeAdId.isNotEmpty
-                      ? EnvironmentsVar.nativeAdId
-                      : null,
-            ),
+    remoteConfigDefaults: {
+      'min_insta_ad_interval': 7,
+      'min_rewarded_ad_interval': 13,
+      'min_banner_ad_interval': 3,
+      'min_app_open_ad': 1,
+      'should_show_app_open_ad': true,
+      'time_before_first_insta_ad': 3,
+      'time_before_first_rewared_ad': 10,
+      'min_native_interval': 0,
+    },
+    adsConfig: AdsConfig(
+      bannerAdUnitId:
+          EnvironmentsVar.bannerAdId.isNotEmpty
+              ? EnvironmentsVar.bannerAdId
+              : null,
+      interstitialAdUnitId:
+          EnvironmentsVar.interstitialAdId.isNotEmpty
+              ? EnvironmentsVar.interstitialAdId
+              : null,
+      rewardedAdUnitId:
+          EnvironmentsVar.rewardedAdId.isNotEmpty
+              ? EnvironmentsVar.rewardedAdId
+              : null,
+      appOpenAdUnitId:
+          EnvironmentsVar.appOpenAdId.isNotEmpty
+              ? EnvironmentsVar.appOpenAdId
+              : null,
+      nativeAdUnitId:
+          EnvironmentsVar.nativeAdId.isNotEmpty
+              ? EnvironmentsVar.nativeAdId
+              : null,
+    ),
   );
 
   // Initialize app dependencies

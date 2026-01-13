@@ -3,6 +3,9 @@ import 'package:tiktok_video_downloader/starter_kit/core/error/failure.dart';
 
 /// Repository for fetching remote configuration values
 abstract class RemoteConfigRepository {
+  /// Set default values
+  Future<void> setDefaults(Map<String, dynamic> defaults);
+
   /// Fetch and activate the latest values
   Future<Either<Failure, void>> fetchAndActivate();
 

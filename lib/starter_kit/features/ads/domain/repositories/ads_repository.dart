@@ -13,6 +13,16 @@ class AdsConfig {
   final String? appOpenAdUnitId;
   final List<String> testDeviceIds;
 
+  // Remote Controls (Time-based intervals in seconds)
+  final int minInterstitialInterval;
+  final int minRewardedInterval;
+  final int minNativeInterval;
+  final int minAppOpenInterval;
+  final int minBannerInterval;
+  final bool shouldShowAppOpenAd;
+  final int timeBeforeFirstInstaAd;
+  final int timeBeforeFirstRewardedAd;
+
   const AdsConfig({
     this.bannerAdUnitId,
     this.interstitialAdUnitId,
@@ -20,16 +30,15 @@ class AdsConfig {
     this.nativeAdUnitId,
     this.appOpenAdUnitId,
     this.testDeviceIds = const [],
+    this.minInterstitialInterval = 0,
+    this.minRewardedInterval = 0,
+    this.minNativeInterval = 0,
+    this.minAppOpenInterval = 0,
+    this.minBannerInterval = 0,
+    this.shouldShowAppOpenAd = true,
+    this.timeBeforeFirstInstaAd = 0,
+    this.timeBeforeFirstRewardedAd = 0,
   });
-
-  /// Factory for development with test IDs
-  factory AdsConfig.test() => const AdsConfig(
-    bannerAdUnitId: 'ca-app-pub-3940256099942544/6300978111',
-    interstitialAdUnitId: 'ca-app-pub-3940256099942544/1033173712',
-    rewardedAdUnitId: 'ca-app-pub-3940256099942544/5224354917',
-    nativeAdUnitId: 'ca-app-pub-3940256099942544/2247696110',
-    appOpenAdUnitId: 'ca-app-pub-3940256099942544/3419835294',
-  );
 }
 
 /// Abstract repository for Ad operations

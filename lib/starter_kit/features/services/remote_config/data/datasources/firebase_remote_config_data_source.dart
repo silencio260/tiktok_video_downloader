@@ -6,6 +6,11 @@ class FirebaseRemoteConfigDataSource implements RemoteConfigRemoteDataSource {
   final FirebaseRemoteConfig _remoteConfig = FirebaseRemoteConfig.instance;
 
   @override
+  Future<void> setDefaults(Map<String, dynamic> defaults) async {
+    await _remoteConfig.setDefaults(defaults);
+  }
+
+  @override
   Future<bool> fetchAndActivate() async {
     await _remoteConfig.setConfigSettings(
       RemoteConfigSettings(
