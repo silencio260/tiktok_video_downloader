@@ -7,6 +7,7 @@ import '../../domain/usecases/get_products_usecase.dart';
 import '../../domain/usecases/get_subscription_status_usecase.dart';
 import '../../domain/usecases/purchase_product_usecase.dart';
 import '../../domain/usecases/restore_purchases_usecase.dart';
+import '../../domain/services/subscription_manager.dart';
 
 part 'iap_event.dart';
 part 'iap_state.dart';
@@ -22,7 +23,7 @@ class IapBloc extends Bloc<IapEvent, IapState> {
   List<Product> _products = [];
 
   /// Quick getter for premium status
-  bool get isPremium => _currentStatus.isPremium;
+  bool get isPremium => SubscriptionManager.instance.isPremium;
 
   /// Current subscription status
   SubscriptionStatus get currentStatus => _currentStatus;
@@ -53,6 +54,7 @@ class IapBloc extends Bloc<IapEvent, IapState> {
       status,
     ) {
       _currentStatus = status;
+      SubscriptionManager.instance.updateStatus(status);
       emit(IapInitialized(status: status));
     });
   }
@@ -83,6 +85,7 @@ class IapBloc extends Bloc<IapEvent, IapState> {
       status,
     ) {
       _currentStatus = status;
+      SubscriptionManager.instance.updateStatus(status);
       emit(IapPurchaseSuccess(status: status));
     });
   }
@@ -98,6 +101,7 @@ class IapBloc extends Bloc<IapEvent, IapState> {
       status,
     ) {
       _currentStatus = status;
+      SubscriptionManager.instance.updateStatus(status);
       emit(IapRestoreSuccess(status: status));
     });
   }

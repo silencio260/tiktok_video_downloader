@@ -4,8 +4,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../../../starter_kit.dart';
 import '../../../../../src/config/environment_vars.dart';
+import '../../../analytics/domain/entities/ad_revenue_event.dart';
 import '../../domain/services/ad_suppression_manager.dart';
 import '../../../iap/presentation/bloc/iap_bloc.dart';
+import '../../domain/repositories/ads_repository.dart';
 import '../bloc/ads_bloc.dart';
 
 class NativeAdWidget extends StatefulWidget {
@@ -106,6 +108,18 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
               });
             }
           }
+        },
+        onPaidEvent: (ad, valueMicros, precision, currencyCode) {
+          StarterKit.sl<AdsRepository>().recordAdRevenue(
+            AdRevenueEvent(
+              value: valueMicros / 1000000.0,
+              valueMicros: valueMicros,
+              currency: currencyCode,
+              adSource: 'AdMob',
+              adUnitId: ad.adUnitId,
+              adFormat: 'native',
+            ),
+          );
         },
       ),
       nativeTemplateStyle:

@@ -1,6 +1,7 @@
 import '../../domain/entities/ad_reward.dart';
 import '../../domain/entities/ad_unit.dart';
 import '../../domain/repositories/ads_repository.dart';
+import '../../../analytics/domain/entities/ad_revenue_event.dart';
 
 /// Abstract data source for Ad operations
 ///
@@ -9,6 +10,9 @@ import '../../domain/repositories/ads_repository.dart';
 /// - AppLovinMaxDataSource
 /// - IronSourceDataSource
 abstract class AdsRemoteDataSource {
+  /// Set callback for ad revenue events
+  void setOnPaidEventListener(void Function(AdRevenueEvent) listener);
+
   /// Initialize the ads SDK
   Future<void> initialize(AdsConfig config);
 

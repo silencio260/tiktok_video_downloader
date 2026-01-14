@@ -39,3 +39,66 @@ class AnalyticsLogAdRevenue extends AnalyticsEvent {
   @override
   List<Object?> get props => [revenueEvent];
 }
+
+class AnalyticsLogRetention extends AnalyticsEvent {
+  final String name;
+  final Map<String, dynamic> parameters;
+
+  const AnalyticsLogRetention({required this.name, this.parameters = const {}});
+
+  @override
+  List<Object?> get props => [name, parameters];
+}
+
+class AnalyticsLogUserSegment extends AnalyticsEvent {
+  final String name;
+  final Map<String, dynamic> parameters;
+
+  const AnalyticsLogUserSegment({
+    required this.name,
+    this.parameters = const {},
+  });
+
+  @override
+  List<Object?> get props => [name, parameters];
+}
+
+class AnalyticsLogTargeting extends AnalyticsEvent {
+  final String name;
+  final Map<String, dynamic> parameters;
+
+  const AnalyticsLogTargeting({required this.name, this.parameters = const {}});
+
+  @override
+  List<Object?> get props => [name, parameters];
+}
+
+class AnalyticsRecordFlutterError extends AnalyticsEvent {
+  final dynamic error;
+  final dynamic stack;
+  final bool fatal;
+
+  const AnalyticsRecordFlutterError({
+    required this.error,
+    required this.stack,
+    this.fatal = false,
+  });
+
+  @override
+  List<Object?> get props => [error, stack, fatal];
+}
+
+class AnalyticsRecordError extends AnalyticsEvent {
+  final dynamic error;
+  final dynamic stack;
+  final bool fatal;
+
+  const AnalyticsRecordError({
+    required this.error,
+    required this.stack,
+    this.fatal = false,
+  });
+
+  @override
+  List<Object?> get props => [error, stack, fatal];
+}

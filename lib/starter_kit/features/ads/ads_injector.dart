@@ -27,9 +27,13 @@ void initAdsFeature(
   }
 
   // Repository
-  sl.registerLazySingleton<AdsRepository>(
-    () => AdsRepositoryImpl(remoteDataSource: sl()),
-  );
+  sl.registerLazySingleton<AdsRepository>(() {
+    final repo = AdsRepositoryImpl(remoteDataSource: sl());
+    if (onPaidEvent != null) {
+      repo.setOnPaidEventListener(onPaidEvent);
+    }
+    return repo;
+  });
 
   // Use cases
   sl.registerLazySingleton<ShowInterstitialUseCase>(

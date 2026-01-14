@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'starter_kit/core/core_injector.dart';
+import 'starter_kit/core/storage/local_storage.dart';
+import 'starter_kit/features/analytics/domain/services/retention_tracker.dart';
+import 'starter_kit/features/analytics/domain/services/user_targeting_manager.dart';
 
 import 'starter_kit/starter_kit.dart';
 import 'starter_kit/features/ads/domain/repositories/ads_repository.dart';
@@ -7,6 +13,7 @@ import 'starter_kit/features/analytics/presentation/bloc/analytics_event.dart';
 import 'starter_kit/features/services/push_notifications/domain/repositories/push_notifications_repository.dart';
 import 'starter_kit/features/services/remote_config/domain/repositories/remote_config_repository.dart';
 import 'starter_kit/features/ads/presentation/bloc/ads_bloc.dart';
+import 'starter_kit/features/analytics/domain/utils/analytics_names.dart';
 
 /// Initialize StarterKit with all features
 Future<void> initializeStarterKit({
@@ -24,6 +31,22 @@ Future<void> initializeStarterKit({
     supportEmail: supportEmail,
   );
 
+  // Setup Crashlytics
+  FlutterError.onError = (errorDetails) {
+    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+    StarterKit.analytics.recordFlutterError(
+      errorDetails.exception,
+      errorDetails.stack,
+      fatal: true,
+    );
+  };
+
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    StarterKit.analytics.recordError(error, stack, fatal: true);
+    return true;
+  };
+
   // Fetch and activate Remote Config
   final remoteConfig = StarterKit.sl<RemoteConfigRepository>();
   if (remoteConfigDefaults != null) {
@@ -35,6 +58,9 @@ Future<void> initializeStarterKit({
   }
 
   await remoteConfig.fetchAndActivate();
+
+  // Initialize analytics names from Remote Config
+  AnalyticsNames.instance.initialize(remoteConfig);
 
   // Merge Remote Config with provided AdsConfig
   final finalAdsConfig = _getAdsConfigFromRemoteConfig(adsConfig);
@@ -62,6 +88,11 @@ Future<void> initializeStarterKit({
     posthogHost: posthogHost,
   );
   _initializeAnalytics();
+
+  // Start Retention Tracking & User Targeting
+  RetentionTracker.instance.init(StarterKit.sl<LocalStorage>());
+  await UserTargetingManager.startTracking(StarterKit.analytics);
+
   await _initializeAds(adsConfig: finalAdsConfig);
   await _initializeOneSignal(oneSignalAppId: oneSignalAppId);
 }
@@ -103,6 +134,9 @@ Future<void> _initializeStarterKitCore({
   String? feedbackNestApiKey,
   required String supportEmail,
 }) async {
+  // Core (Storage, etc)
+  initCore(StarterKit.sl);
+
   await StarterKit.initialize(
     postHogDataSource:
         (posthogApiKey != null && posthogApiKey.isNotEmpty)

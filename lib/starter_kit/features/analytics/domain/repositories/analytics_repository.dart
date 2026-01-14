@@ -24,6 +24,29 @@ abstract class AnalyticsRepository {
   /// Track screen view
   Future<Either<Failure, void>> logScreenView(String screenName);
 
-  /// Track retention (app open)
-  Future<Either<Failure, void>> trackAppOpen();
+  // Status Saver Specialized Events
+  Future<Either<Failure, void>> logRetentionEvent(
+    String eventName,
+    Map<String, dynamic> parameters,
+  );
+  Future<Either<Failure, void>> logUserSegmentEvent(
+    String eventName,
+    Map<String, dynamic> parameters,
+  );
+  Future<Either<Failure, void>> logTargetingEvent(
+    String eventName,
+    Map<String, dynamic> parameters,
+  );
+
+  // Crashlytics
+  Future<Either<Failure, void>> recordFlutterError(
+    dynamic error,
+    dynamic stack, {
+    bool fatal = false,
+  });
+  Future<Either<Failure, void>> recordError(
+    dynamic error,
+    dynamic stack, {
+    bool fatal = false,
+  });
 }

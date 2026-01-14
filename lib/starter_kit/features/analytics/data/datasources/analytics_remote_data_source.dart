@@ -9,4 +9,26 @@ abstract class AnalyticsRemoteDataSource {
   Future<void> setUserId(String userId);
   Future<void> setUserProperty(String name, String value);
   Future<void> logScreenView(String screenName);
+
+  // Status Saver Specialized Events
+  Future<void> logRetentionEvent(
+    String eventName,
+    Map<String, dynamic> parameters,
+  );
+  Future<void> logUserSegmentEvent(
+    String eventName,
+    Map<String, dynamic> parameters,
+  );
+  Future<void> logTargetingEvent(
+    String eventName,
+    Map<String, dynamic> parameters,
+  );
+
+  // Crashlytics
+  Future<void> recordFlutterError(
+    dynamic error,
+    dynamic stack, {
+    bool fatal = false,
+  });
+  Future<void> recordError(dynamic error, dynamic stack, {bool fatal = false});
 }

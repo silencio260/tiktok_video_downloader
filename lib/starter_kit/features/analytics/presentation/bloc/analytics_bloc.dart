@@ -21,6 +21,11 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
     on<AnalyticsLogEvent>(_onLogEvent);
     on<AnalyticsLogAdRevenue>(_onLogAdRevenue);
     on<AnalyticsSetUserId>(_onSetUserId);
+    on<AnalyticsLogRetention>(_onLogRetention);
+    on<AnalyticsLogUserSegment>(_onLogUserSegment);
+    on<AnalyticsLogTargeting>(_onLogTargeting);
+    on<AnalyticsRecordFlutterError>(_onRecordFlutterError);
+    on<AnalyticsRecordError>(_onRecordError);
   }
 
   Future<void> _onInitialize(
@@ -55,5 +60,44 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
     Emitter<AnalyticsState> emit,
   ) async {
     await logAdRevenueUseCase(event.revenueEvent);
+  }
+
+  Future<void> _onLogRetention(
+    AnalyticsLogRetention event,
+    Emitter<AnalyticsState> emit,
+  ) async {
+    await repository.logRetentionEvent(event.name, event.parameters);
+  }
+
+  Future<void> _onLogUserSegment(
+    AnalyticsLogUserSegment event,
+    Emitter<AnalyticsState> emit,
+  ) async {
+    await repository.logUserSegmentEvent(event.name, event.parameters);
+  }
+
+  Future<void> _onLogTargeting(
+    AnalyticsLogTargeting event,
+    Emitter<AnalyticsState> emit,
+  ) async {
+    await repository.logTargetingEvent(event.name, event.parameters);
+  }
+
+  Future<void> _onRecordFlutterError(
+    AnalyticsRecordFlutterError event,
+    Emitter<AnalyticsState> emit,
+  ) async {
+    await repository.recordFlutterError(
+      event.error,
+      event.stack,
+      fatal: event.fatal,
+    );
+  }
+
+  Future<void> _onRecordError(
+    AnalyticsRecordError event,
+    Emitter<AnalyticsState> emit,
+  ) async {
+    await repository.recordError(event.error, event.stack, fatal: event.fatal);
   }
 }

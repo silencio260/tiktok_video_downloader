@@ -12,6 +12,11 @@ import 'features/analytics/presentation/bloc/analytics_event.dart';
 import 'features/iap/iap_injector.dart';
 import 'features/iap/data/datasources/iap_remote_data_source.dart';
 import 'features/iap/presentation/bloc/iap_bloc.dart';
+import 'features/iap/domain/services/subscription_manager.dart';
+import 'features/analytics/domain/services/analytics_service.dart';
+import 'features/analytics/domain/services/retention_tracker.dart';
+import 'features/analytics/domain/services/user_targeting_manager.dart';
+import 'features/ads/domain/repositories/ads_repository.dart';
 import 'features/onboarding/domain/models/onboarding_page_model.dart';
 import 'features/onboarding/presentation/onboarding_view.dart';
 import 'features/services/services_injector.dart';
@@ -72,6 +77,23 @@ class StarterKit {
   static IapBloc get iapBloc => _sl<IapBloc>();
   static AdsBloc get adsBloc => _sl<AdsBloc>();
   static AnalyticsBloc get analyticsBloc => _sl<AnalyticsBloc>();
+
+  /// Access the Analytics Service for high-level event logging
+  static AnalyticsService get analytics => AnalyticsService(analyticsBloc);
+
+  /// Access the Subscription Manager for simple premium status checks
+  static SubscriptionManager get subscriptionManager =>
+      SubscriptionManager.instance;
+
+  /// Access the Retention Tracker for engagement data
+  static RetentionTracker get retentionTracker => RetentionTracker.instance;
+
+  /// Access the User Targeting Manager for segmentation data
+  static UserTargetingManager get userTargetingManager =>
+      UserTargetingManager.instance;
+
+  /// Access the Ads Repository directly
+  static AdsRepository get adsRepository => _sl<AdsRepository>();
 
   /// Access PostHog directly if initialized
   static PostHogRemoteDataSource? get postHog {

@@ -58,16 +58,66 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
   }
 
   @override
-  Future<Either<Failure, void>> trackAppOpen() async {
-    // This could also interact with a local data source for retention tracking
-    await logEvent(const AnalyticsEvent(name: 'app_open'));
+  Future<Either<Failure, void>> logAdRevenue(AdRevenueEvent event) async {
+    for (final source in _dataSources) {
+      await source.logAdRevenue(event);
+    }
     return const Right(null);
   }
 
   @override
-  Future<Either<Failure, void>> logAdRevenue(AdRevenueEvent event) async {
+  Future<Either<Failure, void>> logRetentionEvent(
+    String eventName,
+    Map<String, dynamic> parameters,
+  ) async {
     for (final source in _dataSources) {
-      await source.logAdRevenue(event);
+      await source.logRetentionEvent(eventName, parameters);
+    }
+    return const Right(null);
+  }
+
+  @override
+  Future<Either<Failure, void>> logUserSegmentEvent(
+    String eventName,
+    Map<String, dynamic> parameters,
+  ) async {
+    for (final source in _dataSources) {
+      await source.logUserSegmentEvent(eventName, parameters);
+    }
+    return const Right(null);
+  }
+
+  @override
+  Future<Either<Failure, void>> logTargetingEvent(
+    String eventName,
+    Map<String, dynamic> parameters,
+  ) async {
+    for (final source in _dataSources) {
+      await source.logTargetingEvent(eventName, parameters);
+    }
+    return const Right(null);
+  }
+
+  @override
+  Future<Either<Failure, void>> recordFlutterError(
+    dynamic error,
+    dynamic stack, {
+    bool fatal = false,
+  }) async {
+    for (final source in _dataSources) {
+      await source.recordFlutterError(error, stack, fatal: fatal);
+    }
+    return const Right(null);
+  }
+
+  @override
+  Future<Either<Failure, void>> recordError(
+    dynamic error,
+    dynamic stack, {
+    bool fatal = false,
+  }) async {
+    for (final source in _dataSources) {
+      await source.recordError(error, stack, fatal: fatal);
     }
     return const Right(null);
   }

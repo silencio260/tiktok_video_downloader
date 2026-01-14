@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
@@ -20,21 +21,27 @@ class FirebaseAnalyticsDataSource implements AnalyticsRemoteDataSource {
   @override
   Future<void> logEvent(AnalyticsEvent event) async {
     if (!_isInitialized) return;
-    await _analytics?.logEvent(
-      name: event.name,
-      parameters: event.parameters.cast<String, Object>(),
-    );
+    final params = Map<String, Object>.from(event.parameters);
+    params['platform'] = Platform.operatingSystem;
+    await _analytics?.logEvent(name: event.name, parameters: params);
   }
 
   @override
   Future<void> logAdRevenue(AdRevenueEvent event) async {
     if (!_isInitialized) return;
-    await _analytics?.logAdImpression(
-      value: event.value,
-      currency: event.currency,
-      adSource: event.adSource,
-      adUnitName: event.adUnitId,
-      adFormat: event.adFormat,
+    // Manual mapping to match Status Saver template's "special" keys
+    await _analytics?.logEvent(
+      name: 'ad_impression',
+      parameters: {
+        'ad_platform': event.adSource,
+        'ad_unit_id': event.adUnitId,
+        'ad_format': event.adFormat ?? 'unknown',
+        'value': event.value,
+        'valueMicros': event.valueMicros,
+        'currency': event.currency,
+        'platform': Platform.operatingSystem,
+        if (event.adNetwork != null) 'ad_network': event.adNetwork!,
+      },
     );
   }
 
@@ -55,5 +62,60 @@ class FirebaseAnalyticsDataSource implements AnalyticsRemoteDataSource {
   Future<void> logScreenView(String screenName) async {
     if (!_isInitialized) return;
     await _analytics?.logScreenView(screenName: screenName);
+  }
+
+  @override
+  Future<void> logRetentionEvent(
+    String eventName,
+    Map<String, dynamic> parameters,
+  ) async {
+    if (!_isInitialized) return;
+    final params = parameters.cast<String, Object>();
+    final finalParams = Map<String, Object>.from(params);
+    finalParams['platform'] = Platform.operatingSystem;
+    await _analytics?.logEvent(name: eventName, parameters: finalParams);
+  }
+
+  @override
+  Future<void> logUserSegmentEvent(
+    String eventName,
+    Map<String, dynamic> parameters,
+  ) async {
+    if (!_isInitialized) return;
+    final params = parameters.cast<String, Object>();
+    final finalParams = Map<String, Object>.from(params);
+    finalParams['platform'] = Platform.operatingSystem;
+    await _analytics?.logEvent(name: eventName, parameters: finalParams);
+  }
+
+  @override
+  Future<void> logTargetingEvent(
+    String eventName,
+    Map<String, dynamic> parameters,
+  ) async {
+    if (!_isInitialized) return;
+    final params = parameters.cast<String, Object>();
+    final finalParams = Map<String, Object>.from(params);
+    finalParams['platform'] = Platform.operatingSystem;
+    await _analytics?.logEvent(name: eventName, parameters: finalParams);
+  }
+
+  @override
+  Future<void> recordFlutterError(
+    dynamic error,
+    dynamic stack, {
+    bool fatal = false,
+  }) async {
+    // If error is FlutterErrorDetails, record as fatal if requested
+    await FirebaseCrashlytics.instance.recordError(error, stack, fatal: fatal);
+  }
+
+  @override
+  Future<void> recordError(
+    dynamic error,
+    dynamic stack, {
+    bool fatal = false,
+  }) async {
+    await FirebaseCrashlytics.instance.recordError(error, stack, fatal: fatal);
   }
 }

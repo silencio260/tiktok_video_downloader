@@ -6,6 +6,7 @@ import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/ad_reward.dart';
 import '../../domain/entities/ad_unit.dart';
 import '../../domain/repositories/ads_repository.dart';
+import '../../../analytics/domain/entities/ad_revenue_event.dart';
 import 'ads_remote_data_source.dart';
 
 /// AdMob implementation of AdsRemoteDataSource
@@ -21,6 +22,12 @@ class AdMobDataSource implements AdsRemoteDataSource {
   bool _isInitialized = false;
 
   Completer<AdReward>? _rewardedCompleter;
+  void Function(AdRevenueEvent)? _onPaidEvent;
+
+  @override
+  void setOnPaidEventListener(void Function(AdRevenueEvent) listener) {
+    _onPaidEvent = listener;
+  }
 
   @override
   Future<void> initialize(AdsConfig config) async {
@@ -89,6 +96,23 @@ class AdMobDataSource implements AdsRemoteDataSource {
               _interstitialAd = null;
             },
           );
+          _interstitialAd!.onPaidEvent = (
+            ad,
+            valueMicros,
+            precision,
+            currencyCode,
+          ) {
+            _onPaidEvent?.call(
+              AdRevenueEvent(
+                value: valueMicros / 1000000.0,
+                valueMicros: valueMicros,
+                currency: currencyCode,
+                adSource: 'AdMob',
+                adUnitId: ad.adUnitId,
+                adFormat: 'interstitial',
+              ),
+            );
+          };
           completer.complete(
             AdUnit(id: adUnitId, type: AdType.interstitial, isLoaded: true),
           );
@@ -150,6 +174,23 @@ class AdMobDataSource implements AdsRemoteDataSource {
               );
             },
           );
+          _rewardedAd!.onPaidEvent = (
+            ad,
+            valueMicros,
+            precision,
+            currencyCode,
+          ) {
+            _onPaidEvent?.call(
+              AdRevenueEvent(
+                value: valueMicros / 1000000.0,
+                valueMicros: valueMicros,
+                currency: currencyCode,
+                adSource: 'AdMob',
+                adUnitId: ad.adUnitId,
+                adFormat: 'rewarded',
+              ),
+            );
+          };
           completer.complete(
             AdUnit(id: adUnitId, type: AdType.rewarded, isLoaded: true),
           );
@@ -227,6 +268,18 @@ class AdMobDataSource implements AdsRemoteDataSource {
               _appOpenAd = null;
             },
           );
+          _appOpenAd!.onPaidEvent = (ad, valueMicros, precision, currencyCode) {
+            _onPaidEvent?.call(
+              AdRevenueEvent(
+                value: valueMicros / 1000000.0,
+                valueMicros: valueMicros,
+                currency: currencyCode,
+                adSource: 'AdMob',
+                adUnitId: ad.adUnitId,
+                adFormat: 'app_open',
+              ),
+            );
+          };
           completer.complete(
             AdUnit(id: adUnitId, type: AdType.appOpen, isLoaded: true),
           );

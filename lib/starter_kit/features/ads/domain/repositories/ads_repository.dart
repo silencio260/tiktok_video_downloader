@@ -3,6 +3,7 @@ import 'package:dartz/dartz.dart';
 import '../../../../core/error/failure.dart';
 import '../entities/ad_reward.dart';
 import '../entities/ad_unit.dart';
+import '../../../analytics/domain/entities/ad_revenue_event.dart';
 
 /// Configuration for the ads service
 class AdsConfig {
@@ -49,6 +50,12 @@ class AdsConfig {
 /// - IronSourceRepository
 /// - UnityAdsRepository
 abstract class AdsRepository {
+  /// Set callback for ad revenue events
+  void setOnPaidEventListener(void Function(AdRevenueEvent) listener);
+
+  /// Record ad revenue from an ad
+  void recordAdRevenue(AdRevenueEvent event);
+
   /// Initialize the ads SDK
   Future<Either<Failure, void>> initialize(AdsConfig config);
 

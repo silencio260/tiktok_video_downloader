@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 /// Represents an Ad Revenue Event to be logged
 class AdRevenueEvent extends Equatable {
   final double value;
+  final double valueMicros;
   final String currency;
   final String adSource; // e.g., AdMob, AppLovin
   final String adUnitId;
@@ -11,6 +12,7 @@ class AdRevenueEvent extends Equatable {
 
   const AdRevenueEvent({
     required this.value,
+    required this.valueMicros,
     required this.currency,
     required this.adSource,
     required this.adUnitId,
@@ -21,6 +23,7 @@ class AdRevenueEvent extends Equatable {
   @override
   List<Object?> get props => [
     value,
+    valueMicros,
     currency,
     adSource,
     adUnitId,

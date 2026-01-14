@@ -6,12 +6,25 @@ import '../../domain/entities/ad_reward.dart';
 import '../../domain/entities/ad_unit.dart';
 import '../../domain/repositories/ads_repository.dart';
 import '../datasources/ads_remote_data_source.dart';
+import '../../../analytics/domain/entities/ad_revenue_event.dart';
 
 /// Implementation of AdsRepository using the injected data source
 class AdsRepositoryImpl implements AdsRepository {
   final AdsRemoteDataSource remoteDataSource;
+  void Function(AdRevenueEvent)? _onPaidEvent;
 
   AdsRepositoryImpl({required this.remoteDataSource});
+
+  @override
+  void setOnPaidEventListener(void Function(AdRevenueEvent) listener) {
+    _onPaidEvent = listener;
+    remoteDataSource.setOnPaidEventListener(listener);
+  }
+
+  @override
+  void recordAdRevenue(AdRevenueEvent event) {
+    _onPaidEvent?.call(event);
+  }
 
   @override
   Future<Either<Failure, void>> initialize(AdsConfig config) async {

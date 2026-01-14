@@ -4,6 +4,8 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../../../starter_kit.dart';
 import '../../domain/services/ad_suppression_manager.dart';
 import '../../../iap/presentation/bloc/iap_bloc.dart';
+import '../../../analytics/domain/entities/ad_revenue_event.dart';
+import '../../domain/repositories/ads_repository.dart';
 import '../bloc/ads_bloc.dart';
 
 class BannerAdWidget extends StatefulWidget {
@@ -69,6 +71,18 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
         onAdFailedToLoad: (ad, error) {
           debugPrint('BannerAdWidget: Failed to load ad: $error');
           ad.dispose();
+        },
+        onPaidEvent: (ad, valueMicros, precision, currencyCode) {
+          StarterKit.sl<AdsRepository>().recordAdRevenue(
+            AdRevenueEvent(
+              value: valueMicros / 1000000.0,
+              valueMicros: valueMicros,
+              currency: currencyCode,
+              adSource: 'AdMob',
+              adUnitId: ad.adUnitId,
+              adFormat: 'banner',
+            ),
+          );
         },
       ),
     )..load();
