@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../../../starter_kit.dart';
+import '../../domain/services/ad_suppression_manager.dart';
+import '../../../iap/presentation/bloc/iap_bloc.dart';
 import '../bloc/ads_bloc.dart';
 
 class BannerAdWidget extends StatefulWidget {
@@ -20,9 +22,19 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
   String? _currentAdUnitId;
 
   @override
+  void initState() {
+    super.initState();
+    AdSuppressionManager.instance.addListener(_onSuppressionChanged);
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _checkAndLoad();
+  }
+
+  void _onSuppressionChanged() {
+    if (mounted) setState(() {});
   }
 
   void _checkAndLoad() {
@@ -64,35 +76,55 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
 
   @override
   void dispose() {
+    AdSuppressionManager.instance.removeListener(_onSuppressionChanged);
     _bannerAd?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AdsBloc, AdsState>(
-      bloc: StarterKit.adsBloc,
-      builder: (context, state) {
-        final newAdUnitId = widget.adUnitId ?? state.config?.bannerAdUnitId;
-        if (newAdUnitId != null &&
-            newAdUnitId.isNotEmpty &&
-            newAdUnitId != _currentAdUnitId) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              _currentAdUnitId = newAdUnitId;
-              _loadAd(newAdUnitId);
-            }
-          });
-        }
-
-        if (_bannerAd == null || !_isLoaded) {
+    return BlocBuilder<IapBloc, IapState>(
+      bloc: StarterKit.iapBloc,
+      builder: (context, iapState) {
+        if (StarterKit.iapBloc.isPremium) {
           return const SizedBox.shrink();
         }
 
-        return SizedBox(
-          width: _bannerAd!.size.width.toDouble(),
-          height: _bannerAd!.size.height.toDouble(),
-          child: AdWidget(ad: _bannerAd!),
+        return ListenableBuilder(
+          listenable: AdSuppressionManager.instance,
+          builder: (context, _) {
+            if (AdSuppressionManager.instance.areAdsSuppressed) {
+              return const SizedBox.shrink();
+            }
+
+            return BlocBuilder<AdsBloc, AdsState>(
+              bloc: StarterKit.adsBloc,
+              builder: (context, state) {
+                final newAdUnitId =
+                    widget.adUnitId ?? state.config?.bannerAdUnitId;
+                if (newAdUnitId != null &&
+                    newAdUnitId.isNotEmpty &&
+                    newAdUnitId != _currentAdUnitId) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted) {
+                      _currentAdUnitId = newAdUnitId;
+                      _loadAd(newAdUnitId);
+                    }
+                  });
+                }
+
+                if (_bannerAd == null || !_isLoaded) {
+                  return const SizedBox.shrink();
+                }
+
+                return SizedBox(
+                  width: _bannerAd!.size.width.toDouble(),
+                  height: _bannerAd!.size.height.toDouble(),
+                  child: AdWidget(ad: _bannerAd!),
+                );
+              },
+            );
+          },
         );
       },
     );

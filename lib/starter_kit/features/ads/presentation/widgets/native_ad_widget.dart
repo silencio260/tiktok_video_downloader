@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../../../starter_kit.dart';
 import '../../../../../src/config/environment_vars.dart';
+import '../../domain/services/ad_suppression_manager.dart';
+import '../../../iap/presentation/bloc/iap_bloc.dart';
 import '../bloc/ads_bloc.dart';
 
 class NativeAdWidget extends StatefulWidget {
@@ -145,58 +147,81 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AdsBloc, AdsState>(
-      bloc: StarterKit.adsBloc,
-      builder: (context, state) {
-        final newAdUnitId = widget.adUnitId ?? state.config?.nativeAdUnitId;
-        if (newAdUnitId != null &&
-            newAdUnitId.isNotEmpty &&
-            newAdUnitId != _currentAdUnitId) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              _currentAdUnitId = newAdUnitId;
-              _retryCount = 0;
-              _loadAd(newAdUnitId);
+    return BlocBuilder<IapBloc, IapState>(
+      bloc: StarterKit.iapBloc,
+      builder: (context, iapState) {
+        if (StarterKit.iapBloc.isPremium) {
+          return const SizedBox.shrink();
+        }
+
+        return ListenableBuilder(
+          listenable: AdSuppressionManager.instance,
+          builder: (context, _) {
+            if (AdSuppressionManager.instance.areAdsSuppressed) {
+              return const SizedBox.shrink();
             }
-          });
-        }
 
-        if (_nativeAd == null || !_isLoaded) {
-          // Only show loading placeholder in debug/dev mode
-          if (kDebugMode || EnvironmentsVar.isDeveloperMode) {
-            return Container(
-              margin: const EdgeInsets.symmetric(vertical: 10),
-              width: widget.width ?? 320,
-              height: widget.height ?? 150,
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E1E1E),
-                borderRadius: BorderRadius.circular(15),
-                border: Border.all(color: Colors.white.withOpacity(0.05)),
-              ),
-              child: const Center(
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white24),
-                ),
-              ),
+            return BlocBuilder<AdsBloc, AdsState>(
+              bloc: StarterKit.adsBloc,
+              builder: (context, state) {
+                final newAdUnitId =
+                    widget.adUnitId ?? state.config?.nativeAdUnitId;
+                if (newAdUnitId != null &&
+                    newAdUnitId.isNotEmpty &&
+                    newAdUnitId != _currentAdUnitId) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted) {
+                      _currentAdUnitId = newAdUnitId;
+                      _retryCount = 0;
+                      _loadAd(newAdUnitId);
+                    }
+                  });
+                }
+
+                if (_nativeAd == null || !_isLoaded) {
+                  // Only show loading placeholder in debug/dev mode
+                  if (kDebugMode || EnvironmentsVar.isDeveloperMode) {
+                    return Container(
+                      margin: const EdgeInsets.symmetric(vertical: 10),
+                      width: widget.width ?? 320,
+                      height: widget.height ?? 150,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E1E1E),
+                        borderRadius: BorderRadius.circular(15),
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.05),
+                        ),
+                      ),
+                      child: const Center(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white24,
+                          ),
+                        ),
+                      ),
+                    );
+                  } else {
+                    return const SizedBox.shrink();
+                  }
+                }
+
+                return Container(
+                  margin: const EdgeInsets.symmetric(vertical: 10),
+                  alignment: Alignment.center,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minWidth: widget.width ?? 320,
+                      minHeight: widget.height ?? 150,
+                      maxWidth: widget.width ?? 400,
+                      maxHeight: widget.height ?? 320,
+                    ),
+                    child: AdWidget(ad: _nativeAd!),
+                  ),
+                );
+              },
             );
-          } else {
-            return const SizedBox.shrink();
-          }
-        }
-
-        return Container(
-          margin: const EdgeInsets.symmetric(vertical: 10),
-          alignment: Alignment.center,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minWidth: widget.width ?? 320,
-              minHeight: widget.height ?? 150,
-              maxWidth: widget.width ?? 400,
-              maxHeight: widget.height ?? 320,
-            ),
-            child: AdWidget(ad: _nativeAd!),
-          ),
+          },
         );
       },
     );

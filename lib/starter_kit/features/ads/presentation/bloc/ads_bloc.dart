@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -7,6 +8,7 @@ import '../../domain/usecases/show_interstitial_usecase.dart';
 import '../../domain/usecases/show_rewarded_usecase.dart';
 import '../../domain/usecases/show_app_open_usecase.dart';
 import '../../domain/repositories/ads_repository.dart';
+import '../../domain/services/ad_suppression_manager.dart';
 import '../../../analytics/domain/entities/ad_revenue_event.dart';
 
 part 'ads_event.dart';
@@ -81,6 +83,12 @@ class AdsBloc extends Bloc<AdsEvent, AdsState> {
   ) async {
     final now = DateTime.now();
 
+    // Check suppression (Paywalls, Modals, or another Ad already showing)
+    if (AdSuppressionManager.instance.areAdsSuppressed) {
+      debugPrint('AdsBloc: Interstitial suppressed by AdSuppressionManager');
+      return;
+    }
+
     // Check first ad delay
     if (now.difference(_sessionStartTime).inSeconds <
         (_currentConfig?.timeBeforeFirstInstaAd ?? 0)) {
@@ -94,7 +102,10 @@ class AdsBloc extends Bloc<AdsEvent, AdsState> {
       return;
     }
 
+    AdSuppressionManager.instance.setAdShowing(true);
     final result = await showInterstitialUseCase();
+    AdSuppressionManager.instance.setAdShowing(false);
+
     result.fold(
       (failure) =>
           emit(AdsError(message: failure.message, config: _currentConfig)),
@@ -130,6 +141,12 @@ class AdsBloc extends Bloc<AdsEvent, AdsState> {
   ) async {
     final now = DateTime.now();
 
+    // Check suppression
+    if (AdSuppressionManager.instance.areAdsSuppressed) {
+      debugPrint('AdsBloc: Rewarded ad suppressed by AdSuppressionManager');
+      return;
+    }
+
     // Check first ad delay
     if (now.difference(_sessionStartTime).inSeconds <
         (_currentConfig?.timeBeforeFirstRewardedAd ?? 0)) {
@@ -143,7 +160,10 @@ class AdsBloc extends Bloc<AdsEvent, AdsState> {
       return;
     }
 
+    AdSuppressionManager.instance.setAdShowing(true);
     final result = await showRewardedUseCase();
+    AdSuppressionManager.instance.setAdShowing(false);
+
     result.fold(
       (failure) =>
           emit(AdsError(message: failure.message, config: _currentConfig)),
@@ -181,6 +201,12 @@ class AdsBloc extends Bloc<AdsEvent, AdsState> {
   ) async {
     if (_currentConfig?.shouldShowAppOpenAd == false) return;
 
+    // Check suppression
+    if (AdSuppressionManager.instance.areAdsSuppressed) {
+      debugPrint('AdsBloc: AppOpen ad suppressed by AdSuppressionManager');
+      return;
+    }
+
     final now = DateTime.now();
     if (_lastAppOpenTime != null &&
         now.difference(_lastAppOpenTime!).inSeconds <
@@ -188,7 +214,10 @@ class AdsBloc extends Bloc<AdsEvent, AdsState> {
       return;
     }
 
+    AdSuppressionManager.instance.setAdShowing(true);
     final result = await showAppOpenUseCase();
+    AdSuppressionManager.instance.setAdShowing(false);
+
     result.fold(
       (failure) =>
           emit(AdsError(message: failure.message, config: _currentConfig)),

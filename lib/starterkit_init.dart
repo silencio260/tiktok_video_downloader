@@ -27,12 +27,35 @@ Future<void> initializeStarterKit({
   // Fetch and activate Remote Config
   final remoteConfig = StarterKit.sl<RemoteConfigRepository>();
   if (remoteConfigDefaults != null) {
+    debugPrint('--- Remote Config Defaults ---');
+    remoteConfigDefaults.forEach((key, value) {
+      debugPrint('$key: $value');
+    });
     await remoteConfig.setDefaults(remoteConfigDefaults);
   }
+
   await remoteConfig.fetchAndActivate();
 
   // Merge Remote Config with provided AdsConfig
   final finalAdsConfig = _getAdsConfigFromRemoteConfig(adsConfig);
+
+  debugPrint('--- Final Remote Config Values (Fetched) ---');
+  debugPrint(
+    'min_insta_ad_interval: ${finalAdsConfig.minInterstitialInterval}',
+  );
+  debugPrint('min_rewarded_ad_interval: ${finalAdsConfig.minRewardedInterval}');
+  debugPrint('min_banner_ad_interval: ${finalAdsConfig.minBannerInterval}');
+  debugPrint('min_app_open_ad: ${finalAdsConfig.minAppOpenInterval}');
+  debugPrint('should_show_app_open_ad: ${finalAdsConfig.shouldShowAppOpenAd}');
+  debugPrint(
+    'time_before_first_insta_ad: ${finalAdsConfig.timeBeforeFirstInstaAd}',
+  );
+  debugPrint(
+    'time_before_first_rewared_ad: ${finalAdsConfig.timeBeforeFirstRewardedAd}',
+  );
+  debugPrint('interstitial_ad_id: ${finalAdsConfig.interstitialAdUnitId}');
+  debugPrint('rewarded_ad_id: ${finalAdsConfig.rewardedAdUnitId}');
+  debugPrint('-------------------------------------------');
 
   await _initializePostHog(
     posthogApiKey: posthogApiKey,
