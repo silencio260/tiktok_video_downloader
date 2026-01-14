@@ -42,28 +42,40 @@ void main() async {
       'time_before_first_insta_ad': 5,
       'time_before_first_rewared_ad': 10,
       'min_native_interval': 0,
+      'banner_ad_id': 'ca-app-pub-3940256099942544/6300978111',
+      'native_ad_id': 'ca-app-pub-3940256099942544/2247696110',
     },
     adsConfig: AdsConfig(
       bannerAdUnitId:
           EnvironmentsVar.bannerAdId.isNotEmpty
               ? EnvironmentsVar.bannerAdId
-              : null,
+              : (kDebugMode
+                  ? 'ca-app-pub-3940256099942544/6300978111' // Test Banner ID
+                  : null),
       interstitialAdUnitId:
           EnvironmentsVar.interstitialAdId.isNotEmpty
               ? EnvironmentsVar.interstitialAdId
-              : null,
+              : (kDebugMode
+                  ? 'ca-app-pub-3940256099942544/1033173712' // Test Interstitial ID
+                  : null),
       rewardedAdUnitId:
           EnvironmentsVar.rewardedAdId.isNotEmpty
               ? EnvironmentsVar.rewardedAdId
-              : null,
+              : (kDebugMode
+                  ? 'ca-app-pub-3940256099942544/5224354917' // Test Rewarded ID
+                  : null),
       appOpenAdUnitId:
           EnvironmentsVar.appOpenAdId.isNotEmpty
               ? EnvironmentsVar.appOpenAdId
-              : null,
+              : (kDebugMode
+                  ? 'ca-app-pub-3940256099942544/9257395921' // Test App Open ID
+                  : null),
       nativeAdUnitId:
           EnvironmentsVar.nativeAdId.isNotEmpty
               ? EnvironmentsVar.nativeAdId
-              : null,
+              : (kDebugMode
+                  ? 'ca-app-pub-3940256099942544/2247696110' // Test Native ID
+                  : null),
     ),
   );
 

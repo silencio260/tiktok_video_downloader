@@ -89,6 +89,18 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
           ad.dispose();
 
           if (mounted) {
+            if (kDebugMode) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Native Ad Error: ${error.code} - ${error.message}',
+                  ),
+                  backgroundColor: Colors.red,
+                  duration: const Duration(seconds: 3),
+                ),
+              );
+            }
+
             setState(() {
               _isLoaded = false;
               _nativeAd = null;
@@ -215,12 +227,25 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
                           color: Colors.white.withOpacity(0.05),
                         ),
                       ),
-                      child: const Center(
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white24,
-                          ),
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white24,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Loading Ad: ${_currentAdUnitId ?? "None"}',
+                              style: const TextStyle(
+                                color: Colors.white54,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     );

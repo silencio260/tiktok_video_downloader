@@ -49,5 +49,9 @@
 	<string>We need access to your photo library to save downloaded videos.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>We need access to your photo library to save downloaded videos.</string>
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-4210665095499726~2328415243</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>This identifier will be used to deliver personalized ads to you.</string>
 </dict>
 </plist>
