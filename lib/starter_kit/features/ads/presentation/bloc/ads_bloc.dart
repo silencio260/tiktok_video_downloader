@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -10,6 +9,7 @@ import '../../domain/usecases/show_app_open_usecase.dart';
 import '../../domain/repositories/ads_repository.dart';
 import '../../domain/services/ad_suppression_manager.dart';
 import '../../../analytics/domain/entities/ad_revenue_event.dart';
+import '../../../../starter_kit.dart';
 
 part 'ads_event.dart';
 part 'ads_state.dart';
@@ -56,9 +56,26 @@ class AdsBloc extends Bloc<AdsEvent, AdsState> {
     emit(AdsLoading(config: _currentConfig));
     final result = await adsRepository.initialize(event.config);
     result.fold(
-      (failure) =>
-          emit(AdsError(message: failure.message, config: _currentConfig)),
-      (_) => emit(AdsInitialized(config: _currentConfig)),
+      (failure) {
+        StarterLog.e(
+          'Failed to initialize Ads',
+          tag: 'ADS',
+          error: failure.message,
+        );
+        emit(AdsError(message: failure.message, config: _currentConfig));
+      },
+      (_) {
+        StarterLog.i(
+          'Ads initialized successfully',
+          tag: 'ADS',
+          values: {
+            'Interstitial': event.config.interstitialAdUnitId ?? 'none',
+            'Rewarded': event.config.rewardedAdUnitId ?? 'none',
+            'Native': event.config.nativeAdUnitId ?? 'none',
+          },
+        );
+        emit(AdsInitialized(config: _currentConfig));
+      },
     );
   }
 
@@ -85,7 +102,11 @@ class AdsBloc extends Bloc<AdsEvent, AdsState> {
 
     // Check suppression (Paywalls, Modals, or another Ad already showing)
     if (AdSuppressionManager.instance.areAdsSuppressed) {
-      debugPrint('AdsBloc: Interstitial suppressed by AdSuppressionManager');
+      StarterLog.d(
+        'Interstitial suppressed',
+        tag: 'ADS',
+        values: {'reason': 'AdSuppressionManager (Active modal or premium)'},
+      );
       return;
     }
 
@@ -143,7 +164,11 @@ class AdsBloc extends Bloc<AdsEvent, AdsState> {
 
     // Check suppression
     if (AdSuppressionManager.instance.areAdsSuppressed) {
-      debugPrint('AdsBloc: Rewarded ad suppressed by AdSuppressionManager');
+      StarterLog.d(
+        'Rewarded ad suppressed',
+        tag: 'ADS',
+        values: {'reason': 'AdSuppressionManager'},
+      );
       return;
     }
 
@@ -168,6 +193,11 @@ class AdsBloc extends Bloc<AdsEvent, AdsState> {
       (failure) =>
           emit(AdsError(message: failure.message, config: _currentConfig)),
       (reward) {
+        StarterLog.i(
+          'Rewarded ad show success',
+          tag: 'ADS',
+          values: {'Type': reward.type, 'Amount': reward.amount},
+        );
         _lastRewardedTime = DateTime.now();
         emit(
           AdsShowSuccess(
@@ -203,7 +233,11 @@ class AdsBloc extends Bloc<AdsEvent, AdsState> {
 
     // Check suppression
     if (AdSuppressionManager.instance.areAdsSuppressed) {
-      debugPrint('AdsBloc: AppOpen ad suppressed by AdSuppressionManager');
+      StarterLog.d(
+        'AppOpen ad suppressed',
+        tag: 'ADS',
+        values: {'reason': 'AdSuppressionManager'},
+      );
       return;
     }
 

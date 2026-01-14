@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/ad_revenue_event.dart';
+import '../../domain/entities/analytics_event.dart' as entity;
 
 abstract class AnalyticsEvent extends Equatable {
   const AnalyticsEvent();
@@ -13,13 +14,21 @@ class AnalyticsInitialize extends AnalyticsEvent {
 }
 
 class AnalyticsLogEvent extends AnalyticsEvent {
-  final String name;
-  final Map<String, dynamic> parameters;
+  final entity.AnalyticsEvent event;
 
-  const AnalyticsLogEvent({required this.name, this.parameters = const {}});
+  const AnalyticsLogEvent(this.event);
 
   @override
-  List<Object?> get props => [name, parameters];
+  List<Object?> get props => [event];
+}
+
+class AnalyticsLogScreenView extends AnalyticsEvent {
+  final String screenName;
+
+  const AnalyticsLogScreenView(this.screenName);
+
+  @override
+  List<Object?> get props => [screenName];
 }
 
 class AnalyticsSetUserId extends AnalyticsEvent {

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../../../../starter_kit.dart';
 import '../entities/subscription_status.dart';
 
 /// Manages subscription state and provides a simple interface for the UI
@@ -25,11 +26,21 @@ class SubscriptionManager extends ChangeNotifier {
   bool get debugOverridePremium => _debugOverridePremium;
 
   /// Update the subscription status (called by IapBloc)
-  void updateStatus(SubscriptionStatus newStatus) {
+  void updateStatus(SubscriptionStatus newStatus, {bool debugLog = false}) {
     if (_status != newStatus) {
       _status = newStatus;
       notifyListeners();
-      debugPrint('SubscriptionManager: Status updated - isPremium: $isPremium');
+      if (debugLog) {
+        StarterLog.i(
+          'Subscription Status Updated',
+          tag: 'IAP',
+          debugLog: true,
+          values: {
+            'Is Premium': isPremium,
+            'Entitlement': _status.activeEntitlementId ?? 'none',
+          },
+        );
+      }
     }
   }
 

@@ -25,7 +25,10 @@ import 'features/settings/presentation/settings_view.dart';
 import 'features/ads/presentation/widgets/banner_ad_widget.dart';
 import 'features/ads/presentation/widgets/native_ad_widget.dart';
 import 'features/analytics/presentation/widgets/posthog_wrapper.dart';
+import 'core/utils/starter_log.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+
+export 'core/utils/starter_log.dart';
 
 /// The Facade for the Starter Kit Plugin
 ///
@@ -44,7 +47,12 @@ class StarterKit {
     AdsRemoteDataSource? adsDataSource,
     List<AnalyticsRemoteDataSource>? analyticsDataSources,
     PostHogRemoteDataSource? postHogDataSource,
+    bool debugLogging = true,
   }) async {
+    // Initialize Logger
+    StarterLog.init(enableLogging: debugLogging);
+    StarterLog.d('StarterKit Initializing...', tag: 'CORE');
+
     // Analytics & PostHog
     initAnalyticsFeature(
       _sl,
@@ -116,7 +124,16 @@ class StarterKit {
     Color activeDotColor = Colors.blue,
     String nextText = 'Next',
     String completeText = 'Start',
+    bool debugLog = false,
   }) {
+    if (debugLog) {
+      StarterLog.d(
+        'Building Onboarding Screen',
+        tag: 'UI',
+        debugLog: true,
+        values: {'Page Count': pages.length, 'Template': template.name},
+      );
+    }
     return OnboardingView(
       pages: pages,
       templateType: template,
@@ -135,7 +152,16 @@ class StarterKit {
     SettingsTemplateType template = SettingsTemplateType.list,
     String title = 'Settings',
     Color? backgroundColor,
+    bool debugLog = false,
   }) {
+    if (debugLog) {
+      StarterLog.d(
+        'Building Settings Screen',
+        tag: 'UI',
+        debugLog: true,
+        values: {'Sections': sections.length, 'Title': title},
+      );
+    }
     return SettingsView(
       sections: sections,
       templateType: template,
@@ -147,7 +173,22 @@ class StarterKit {
   // --- Widget Builders ---
 
   /// Build a Banner Ad Widget
-  static Widget bannerAd({AdSize adSize = AdSize.banner, String? adUnitId}) {
+  static Widget bannerAd({
+    AdSize adSize = AdSize.banner,
+    String? adUnitId,
+    bool debugLog = false,
+  }) {
+    if (debugLog) {
+      StarterLog.d(
+        'Building Banner Ad',
+        tag: 'ADS',
+        debugLog: true,
+        values: {
+          'Size': adSize.toString(),
+          'UnitID': adUnitId ?? 'config_default',
+        },
+      );
+    }
     return BannerAdWidget(adSize: adSize, adUnitId: adUnitId);
   }
 
@@ -157,7 +198,20 @@ class StarterKit {
     NativeTemplateStyle? templateStyle,
     double? width,
     double? height,
+    bool debugLog = false,
   }) {
+    if (debugLog) {
+      StarterLog.d(
+        'Building Native Ad',
+        tag: 'ADS',
+        debugLog: true,
+        values: {
+          'UnitID': adUnitId ?? 'config_default',
+          'Width': width ?? 'auto',
+          'Height': height ?? 'auto',
+        },
+      );
+    }
     return NativeAdWidget(
       adUnitId: adUnitId,
       templateStyle: templateStyle,

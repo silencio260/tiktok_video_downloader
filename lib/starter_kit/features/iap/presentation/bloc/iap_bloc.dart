@@ -8,6 +8,7 @@ import '../../domain/usecases/get_subscription_status_usecase.dart';
 import '../../domain/usecases/purchase_product_usecase.dart';
 import '../../domain/usecases/restore_purchases_usecase.dart';
 import '../../domain/services/subscription_manager.dart';
+import '../../../../starter_kit.dart';
 
 part 'iap_event.dart';
 part 'iap_state.dart';
@@ -50,13 +51,29 @@ class IapBloc extends Bloc<IapEvent, IapState> {
     emit(const IapLoading());
 
     final result = await getSubscriptionStatusUseCase();
-    result.fold((failure) => emit(IapError(message: failure.message)), (
-      status,
-    ) {
-      _currentStatus = status;
-      SubscriptionManager.instance.updateStatus(status);
-      emit(IapInitialized(status: status));
-    });
+    result.fold(
+      (failure) {
+        StarterLog.e(
+          'Failed to refresh sub status',
+          tag: 'IAP',
+          error: failure.message,
+        );
+        emit(IapError(message: failure.message));
+      },
+      (status) {
+        StarterLog.i(
+          'Subscription status updated',
+          tag: 'IAP',
+          values: {
+            'Is Premium': status.isPremium,
+            'Entitlement': status.activeEntitlementId ?? 'none',
+          },
+        );
+        _currentStatus = status;
+        SubscriptionManager.instance.updateStatus(status);
+        emit(IapInitialized(status: status));
+      },
+    );
   }
 
   Future<void> _onLoadProducts(
@@ -66,12 +83,28 @@ class IapBloc extends Bloc<IapEvent, IapState> {
     emit(const IapLoading());
 
     final result = await getProductsUseCase(event.productIds);
-    result.fold((failure) => emit(IapError(message: failure.message)), (
-      products,
-    ) {
-      _products = products;
-      emit(IapProductsLoaded(products: products, status: _currentStatus));
-    });
+    result.fold(
+      (failure) {
+        StarterLog.e(
+          'Failed to load products',
+          tag: 'IAP',
+          error: failure.message,
+        );
+        emit(IapError(message: failure.message));
+      },
+      (products) {
+        StarterLog.i(
+          'Products loaded successfully',
+          tag: 'IAP',
+          values: {
+            'Count': products.length,
+            'Items': products.map((p) => '${p.id} (${p.price})').join(', '),
+          },
+        );
+        _products = products;
+        emit(IapProductsLoaded(products: products, status: _currentStatus));
+      },
+    );
   }
 
   Future<void> _onPurchaseProduct(
@@ -81,13 +114,30 @@ class IapBloc extends Bloc<IapEvent, IapState> {
     emit(IapPurchasing(productId: event.productId));
 
     final result = await purchaseProductUseCase(event.productId);
-    result.fold((failure) => emit(IapError(message: failure.message)), (
-      status,
-    ) {
-      _currentStatus = status;
-      SubscriptionManager.instance.updateStatus(status);
-      emit(IapPurchaseSuccess(status: status));
-    });
+    result.fold(
+      (failure) {
+        StarterLog.e(
+          'Purchase failed',
+          tag: 'IAP',
+          error: failure.message,
+          values: {'ProductID': event.productId},
+        );
+        emit(IapError(message: failure.message));
+      },
+      (status) {
+        StarterLog.i(
+          'Purchase success!',
+          tag: 'IAP',
+          values: {
+            'ProductID': event.productId,
+            'Status': status.isPremium ? 'Active' : 'Missing Entitlement',
+          },
+        );
+        _currentStatus = status;
+        SubscriptionManager.instance.updateStatus(status);
+        emit(IapPurchaseSuccess(status: status));
+      },
+    );
   }
 
   Future<void> _onRestorePurchases(

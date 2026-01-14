@@ -64,6 +64,7 @@ dependencies:
   google_mobile_ads: ^6.0.0
   purchases_flutter: ^9.10.3
   onesignal_flutter: ^5.0.4
+  logger: ^2.6.2
 
 dev_dependencies:
   flutter_test:

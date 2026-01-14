@@ -1,7 +1,9 @@
 import '../utils/analytics_names.dart';
+import '../../../../starter_kit.dart';
 import '../../presentation/bloc/analytics_bloc.dart';
-import '../../presentation/bloc/analytics_event.dart';
-import '../../domain/entities/ad_revenue_event.dart';
+import '../../presentation/bloc/analytics_event.dart' as bloc_event;
+import '../entities/ad_revenue_event.dart';
+import '../entities/analytics_event.dart';
 
 /// Service to simplify logging of standard and custom analytics events
 ///
@@ -14,50 +16,141 @@ class AnalyticsService {
   AnalyticsService(this._bloc);
 
   /// Log a completely custom event
-  void logEvent(String name, {Map<String, dynamic> parameters = const {}}) {
-    _bloc.add(AnalyticsLogEvent(name: name, parameters: parameters));
+  Future<void> logEvent(
+    String eventName, {
+    Map<String, dynamic>? parameters,
+    bool debugLog = false,
+  }) async {
+    final event = AnalyticsEvent(name: eventName, parameters: parameters ?? {});
+    _bloc.add(bloc_event.AnalyticsLogEvent(event));
+
+    if (debugLog) {
+      StarterLog.logAnalyticsEvent(eventName, parameters ?? {}, debugLog: true);
+    }
   }
 
-  /// Log ad revenue
-  void logAdRevenue(AdRevenueEvent event) {
-    // Specifically mapped for Status Saver consistency
-    _bloc.add(AnalyticsLogAdRevenue(event));
+  /// Log ad revenue event
+  Future<void> logAdRevenue(
+    AdRevenueEvent event, {
+    bool debugLog = false,
+  }) async {
+    _bloc.add(bloc_event.AnalyticsLogAdRevenue(event));
+
+    if (debugLog) {
+      StarterLog.logAdEvent(
+        'ad_impression',
+        adUnitId: event.adUnitId,
+        format: event.adFormat,
+        value: event.value,
+        currency: event.currency,
+        debugLog: true,
+      );
+    }
   }
 
   /// Specialized Category Logs
   Future<void> logRetentionEvent(
     String eventName,
-    Map<String, dynamic> parameters,
-  ) async {
-    _bloc.add(AnalyticsLogRetention(name: eventName, parameters: parameters));
+    Map<String, dynamic> parameters, {
+    bool debugLog = false,
+  }) async {
+    _bloc.add(
+      bloc_event.AnalyticsLogRetention(name: eventName, parameters: parameters),
+    );
+    if (debugLog) {
+      StarterLog.d(
+        'Retention Event: $eventName',
+        tag: 'ANALYTICS',
+        debugLog: true,
+        values: parameters,
+      );
+    }
   }
 
   Future<void> logUserSegmentEvent(
     String eventName,
-    Map<String, dynamic> parameters,
-  ) async {
-    _bloc.add(AnalyticsLogUserSegment(name: eventName, parameters: parameters));
+    Map<String, dynamic> parameters, {
+    bool debugLog = false,
+  }) async {
+    _bloc.add(
+      bloc_event.AnalyticsLogUserSegment(
+        name: eventName,
+        parameters: parameters,
+      ),
+    );
+    if (debugLog) {
+      StarterLog.d(
+        'User Segment Event: $eventName',
+        tag: 'ANALYTICS',
+        debugLog: true,
+        values: parameters,
+      );
+    }
   }
 
   Future<void> logTargetingEvent(
     String eventName,
-    Map<String, dynamic> parameters,
-  ) async {
-    _bloc.add(AnalyticsLogTargeting(name: eventName, parameters: parameters));
+    Map<String, dynamic> parameters, {
+    bool debugLog = false,
+  }) async {
+    _bloc.add(
+      bloc_event.AnalyticsLogTargeting(name: eventName, parameters: parameters),
+    );
+    if (debugLog) {
+      StarterLog.d(
+        'Targeting Event: $eventName',
+        tag: 'ANALYTICS',
+        debugLog: true,
+        values: parameters,
+      );
+    }
   }
 
   /// Crashlytics & Error Tracking
-  void recordFlutterError(dynamic error, dynamic stack, {bool fatal = false}) {
+  void recordFlutterError(
+    dynamic error,
+    dynamic stack, {
+    bool fatal = false,
+    bool debugLog = true,
+  }) {
     _bloc.add(
-      AnalyticsRecordFlutterError(error: error, stack: stack, fatal: fatal),
+      bloc_event.AnalyticsRecordFlutterError(
+        error: error,
+        stack: stack,
+        fatal: fatal,
+      ),
     );
+    if (debugLog) {
+      StarterLog.e(
+        'Flutter Error Recorded',
+        tag: 'CRASH',
+        error: error,
+        stackTrace: stack,
+      );
+    }
   }
 
-  void recordError(dynamic error, dynamic stack, {bool fatal = false}) {
-    _bloc.add(AnalyticsRecordError(error: error, stack: stack, fatal: fatal));
+  void recordError(
+    dynamic error,
+    dynamic stack, {
+    bool fatal = false,
+    bool debugLog = true,
+  }) {
+    _bloc.add(
+      bloc_event.AnalyticsRecordError(error: error, stack: stack, fatal: fatal),
+    );
+    if (debugLog) {
+      StarterLog.e(
+        'Error Recorded',
+        tag: 'CRASH',
+        error: error,
+        stackTrace: stack,
+      );
+    }
   }
 
   void testCrash() {
+    StarterLog.w('Triggering Test Crash...', tag: 'CRASH', debugLog: true);
     throw const FormatException(
       'StarterKit: Custom format error for Crashlytics testing',
     );
@@ -65,84 +158,126 @@ class AnalyticsService {
 
   // --- Standard Events ---
 
-  void logAppOpen() => logEvent(_names.appOpen);
+  void logAppOpen({bool debugLog = false}) =>
+      logEvent(_names.appOpen, debugLog: debugLog);
 
-  void logOnboardingComplete() => logEvent(_names.onboardingComplete);
+  void logOnboardingComplete({bool debugLog = false}) =>
+      logEvent(_names.onboardingComplete, debugLog: debugLog);
 
-  void logViewPaywall({String? source}) => logEvent(
+  void logViewPaywall({String? source, bool debugLog = false}) => logEvent(
     _names.viewPaywall,
-    parameters: source != null ? {'source': source} : {},
+    parameters: {if (source != null) 'source': source},
+    debugLog: debugLog,
   );
 
-  void logViewPaywallModal() => logEvent(_names.viewPaywallModal);
+  void logStartTrial({String? productId, bool debugLog = false}) => logEvent(
+    _names.startTrial,
+    parameters: {if (productId != null) 'product_id': productId},
+    debugLog: debugLog,
+  );
 
-  void logGotoAppStore() => logEvent(_names.gotoAppStore);
+  void logSubscribe({String? productId, bool debugLog = false}) => logEvent(
+    _names.subscribe,
+    parameters: {if (productId != null) 'product_id': productId},
+    debugLog: debugLog,
+  );
 
-  void logGotoHome() => logEvent(_names.gotoHome);
+  void logPurchase({String? productId, bool debugLog = false}) => logEvent(
+    _names.purchase,
+    parameters: {if (productId != null) 'product_id': productId},
+    debugLog: debugLog,
+  );
 
-  void logShowHelp() => logEvent(_names.showHelp);
+  void logRefund({String? productId, bool debugLog = false}) => logEvent(
+    _names.refund,
+    parameters: {if (productId != null) 'product_id': productId},
+    debugLog: debugLog,
+  );
 
-  void logShareApp() => logEvent(_names.shareApp);
+  void logIapError({String? error, bool debugLog = false}) => logEvent(
+    _names.iapError,
+    parameters: {if (error != null) 'error': error},
+    debugLog: debugLog,
+  );
 
-  void logSaveStatus() => logEvent(_names.saveStatus);
+  void logShareApp({String? platform, bool debugLog = false}) => logEvent(
+    _names.shareApp,
+    parameters: {if (platform != null) 'platform': platform},
+    debugLog: debugLog,
+  );
 
-  void logDownloadAll() => logEvent(_names.downloadAll);
+  void logRateApp({int? rating, bool debugLog = false}) => logEvent(
+    _names.rateApp,
+    parameters: {if (rating != null) 'rating': rating},
+    debugLog: debugLog,
+  );
 
-  void logRemoveAdsClicked() => logEvent(_names.removeAdsClicked);
+  void logFeedbackSubmit({bool debugLog = false}) =>
+      logEvent(_names.feedbackSubmit, debugLog: debugLog);
 
-  void logAutoSaveEnabled() => logEvent(_names.autoSaveEnabled);
+  void logAdShow({required String adType, bool debugLog = false}) => logEvent(
+    _names.adShow,
+    parameters: {'ad_type': adType},
+    debugLog: debugLog,
+  );
 
-  void logAutoSaveDisabled() => logEvent(_names.autoSaveDisabled);
+  void logAdClick({required String adType, bool debugLog = false}) => logEvent(
+    _names.adClick,
+    parameters: {'ad_type': adType},
+    debugLog: debugLog,
+  );
 
-  // --- Permissions ---
-
-  void logRequestNotification() => logEvent(_names.requestNotification);
-  void logGrantNotification() => logEvent(_names.grantNotification);
-  void logRequestStorage() => logEvent(_names.requestStorage);
-  void logGrantStorage() => logEvent(_names.grantStorage);
-  void logDeniedStorage() => logEvent(_names.deniedStorage);
-
-  // --- Errors ---
-
-  void logAppError(String message) =>
-      logEvent(_names.appError, parameters: {'message': message});
-
-  // --- Rating ---
-
-  void logRatingMaybeLater() => logEvent(_names.ratingMaybeLater);
-  void logRatingNever() => logEvent(_names.ratingNever);
-  void logRatingSubmitted(int stars) =>
-      logEvent(_names.ratingSubmitted, parameters: {'star_count': stars});
-  void logRating4Stars() => logEvent(_names.rating4Stars);
-  void logRating5Stars() => logEvent(_names.rating5Stars);
-
-  // --- Purchases ---
+  void logAdError({
+    required String adType,
+    String? error,
+    bool debugLog = false,
+  }) => logEvent(
+    _names.adError,
+    parameters: {'ad_type': adType, if (error != null) 'error': error},
+    debugLog: debugLog,
+  );
 
   void logCustomPurchase({
-    required double price,
+    required double value,
     required String currency,
-    required String productId,
-    required String entitlementId,
-  }) {
-    logEvent(
-      _names.customPurchase,
-      parameters: {
-        'currency': currency,
-        'value': price,
-        'item_id': productId,
-        'item_name': entitlementId,
-        'quantity': 1,
-      },
+    required String itemId,
+    required String itemName,
+    int quantity = 1,
+    bool debugLog = false,
+  }) async {
+    final params = {
+      'value': value,
+      'currency': currency,
+      'item_id': itemId,
+      'item_name': itemName,
+      'quantity': quantity,
+    };
+
+    _bloc.add(
+      bloc_event.AnalyticsLogEvent(
+        AnalyticsEvent(name: 'custom_purchase', parameters: params),
+      ),
     );
+
+    if (debugLog) {
+      StarterLog.logPurchaseEvent(
+        'custom_purchase',
+        productId: itemId,
+        price: value,
+        currency: currency,
+        debugLog: true,
+      );
+    }
   }
 
-  void logPaywallCancelled(String? entitlementId) => logEvent(
-    _names.paywallCancelled,
-    parameters: entitlementId != null ? {'entitlementId': entitlementId} : {},
-  );
-
-  void logPurchasesRestored(String? entitlementId) => logEvent(
-    _names.purchasesRestored,
-    parameters: entitlementId != null ? {'entitlementId': entitlementId} : {},
-  );
+  void logScreenView(String screenName, {bool debugLog = false}) {
+    _bloc.add(bloc_event.AnalyticsLogScreenView(screenName));
+    if (debugLog) {
+      StarterLog.d(
+        'Screen View: $screenName',
+        tag: 'ANALYTICS',
+        debugLog: true,
+      );
+    }
+  }
 }

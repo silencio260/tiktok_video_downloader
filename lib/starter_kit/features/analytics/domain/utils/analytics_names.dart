@@ -33,6 +33,11 @@ class AnalyticsNames {
   // App Lifecycle
   String appOpen = 'app_open';
   String onboardingComplete = 'onboarding_complete';
+  String startTrial = 'start_trial';
+  String subscribe = 'subscribe';
+  String purchase = 'purchase';
+  String refund = 'refund';
+  String iapError = 'iap_error';
 
   // Navigation / UI
   String viewPaywall = 'view_paywall';
@@ -41,6 +46,8 @@ class AnalyticsNames {
   String gotoHome = 'goto_home_page';
   String showHelp = 'show_help';
   String shareApp = 'share_app';
+  String rateApp = 'rate_app';
+  String feedbackSubmit = 'feedback_submit';
 
   // Features
   String saveStatus = 'save_status';
@@ -48,6 +55,11 @@ class AnalyticsNames {
   String removeAdsClicked = 'remove_ads_clicked';
   String autoSaveEnabled = 'auto_save_enabled';
   String autoSaveDisabled = 'auto_save_disabled';
+
+  // Ads Interaction
+  String adShow = 'ad_show';
+  String adClick = 'ad_click';
+  String adError = 'ad_error';
 
   // Permissions
   String requestNotification = 'request_notification_permission';

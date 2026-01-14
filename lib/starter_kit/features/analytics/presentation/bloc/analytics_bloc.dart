@@ -19,6 +19,7 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
   }) : super(const AnalyticsInitial()) {
     on<AnalyticsInitialize>(_onInitialize);
     on<AnalyticsLogEvent>(_onLogEvent);
+    on<AnalyticsLogScreenView>(_onLogScreenView);
     on<AnalyticsLogAdRevenue>(_onLogAdRevenue);
     on<AnalyticsSetUserId>(_onSetUserId);
     on<AnalyticsLogRetention>(_onLogRetention);
@@ -43,9 +44,14 @@ class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
     AnalyticsLogEvent event,
     Emitter<AnalyticsState> emit,
   ) async {
-    await logEventUseCase(
-      entity.AnalyticsEvent(name: event.name, parameters: event.parameters),
-    );
+    await logEventUseCase(event.event);
+  }
+
+  Future<void> _onLogScreenView(
+    AnalyticsLogScreenView event,
+    Emitter<AnalyticsState> emit,
+  ) async {
+    await repository.logScreenView(event.screenName);
   }
 
   Future<void> _onSetUserId(
