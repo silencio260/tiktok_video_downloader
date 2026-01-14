@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../../../../starter_kit.dart';
-import '../../../../../src/config/environment_vars.dart';
 import '../../../analytics/domain/entities/ad_revenue_event.dart';
 import '../../domain/services/ad_suppression_manager.dart';
 import '../../../iap/presentation/bloc/iap_bloc.dart';
@@ -68,7 +67,11 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
       request: const AdRequest(),
       listener: NativeAdListener(
         onAdLoaded: (ad) {
-          debugPrint('NativeAdWidget: Ad loaded successfully');
+          StarterLog.i(
+            'Native Ad loaded',
+            tag: 'ADS',
+            values: {'UnitID': adUnitId},
+          );
           if (mounted) {
             setState(() {
               _isLoaded = true;
@@ -77,7 +80,12 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
           }
         },
         onAdFailedToLoad: (ad, error) {
-          debugPrint('NativeAdWidget: Failed to load ad: $error');
+          StarterLog.e(
+            'Native Ad failed to load',
+            tag: 'ADS',
+            error: error.message,
+            values: {'UnitID': adUnitId, 'Code': error.code},
+          );
           ad.dispose();
 
           if (mounted) {
@@ -86,20 +94,21 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
               _nativeAd = null;
             });
 
-            // Retry logic for No Fill (3) or Internal Error (0)
+            // Retry logic
             if (_retryCount < _maxRetries) {
               _retryCount++;
-
-              // If medium fails with internal error, try small template
               if (_currentTemplateType == TemplateType.medium) {
                 _currentTemplateType = TemplateType.small;
-                debugPrint(
-                  'NativeAdWidget: Switching to Small template for retry',
+                StarterLog.d(
+                  'Native Ad: Switching to Small template for retry',
+                  tag: 'ADS',
                 );
               }
 
-              debugPrint(
-                'NativeAdWidget: Retrying load (attempt $_retryCount)...',
+              StarterLog.d(
+                'Native Ad: Retrying load...',
+                tag: 'ADS',
+                values: {'Attempt': _retryCount},
               );
               Future.delayed(const Duration(seconds: 2), () {
                 if (mounted && _currentAdUnitId != null) {
@@ -193,8 +202,8 @@ class _NativeAdWidgetState extends State<NativeAdWidget> {
                 }
 
                 if (_nativeAd == null || !_isLoaded) {
-                  // Only show loading placeholder in debug/dev mode
-                  if (kDebugMode || EnvironmentsVar.isDeveloperMode) {
+                  // Only show loading placeholder in debug mode
+                  if (kDebugMode) {
                     return Container(
                       margin: const EdgeInsets.symmetric(vertical: 10),
                       width: widget.width ?? 320,

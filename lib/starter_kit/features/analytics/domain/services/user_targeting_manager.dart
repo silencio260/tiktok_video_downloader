@@ -83,10 +83,10 @@ class UserTargetingManager with WidgetsBindingObserver {
     return {
       'segment': getUserSegment(),
       'engagement_level': getEngagementLevel().toString().split('.').last,
-      'is_first_time': isFirstTimeUser(),
-      'is_new': isNewUser(),
-      'is_loyal': isLoyalUser(),
-      'is_power_user': isPowerUser(),
+      'is_first_time': isFirstTimeUser() ? 1 : 0,
+      'is_new': isNewUser() ? 1 : 0,
+      'is_loyal': isLoyalUser() ? 1 : 0,
+      'is_power_user': isPowerUser() ? 1 : 0,
       'days_since_install': _tracker.getDaysSinceInstall(),
       'total_opens': _tracker.getTotalAppOpens(),
     };

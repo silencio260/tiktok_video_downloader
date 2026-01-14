@@ -8,6 +8,7 @@ import '../../domain/entities/ad_unit.dart';
 import '../../domain/repositories/ads_repository.dart';
 import '../../../analytics/domain/entities/ad_revenue_event.dart';
 import 'ads_remote_data_source.dart';
+import '../../../../starter_kit.dart';
 
 /// AdMob implementation of AdsRemoteDataSource
 ///
@@ -80,10 +81,16 @@ class AdMobDataSource implements AdsRemoteDataSource {
       request: const AdRequest(),
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (ad) {
+          StarterLog.i(
+            'Interstitial ad loaded',
+            tag: 'ADS',
+            values: {'UnitID': adUnitId},
+          );
           _interstitialAd = ad;
           _interstitialAd!
               .fullScreenContentCallback = FullScreenContentCallback(
             onAdDismissedFullScreenContent: (ad) {
+              StarterLog.d('Interstitial ad dismissed', tag: 'ADS');
               ad.dispose();
               _interstitialAd = null;
               // Preload next ad
@@ -92,6 +99,11 @@ class AdMobDataSource implements AdsRemoteDataSource {
               }
             },
             onAdFailedToShowFullScreenContent: (ad, error) {
+              StarterLog.e(
+                'Interstitial ad failed to show',
+                tag: 'ADS',
+                error: error,
+              );
               ad.dispose();
               _interstitialAd = null;
             },
@@ -118,6 +130,12 @@ class AdMobDataSource implements AdsRemoteDataSource {
           );
         },
         onAdFailedToLoad: (error) {
+          StarterLog.e(
+            'Interstitial ad failed to load',
+            tag: 'ADS',
+            error: error.message,
+            values: {'UnitID': adUnitId, 'Code': error.code},
+          );
           completer.complete(
             AdUnit(
               id: adUnitId,
@@ -156,9 +174,15 @@ class AdMobDataSource implements AdsRemoteDataSource {
       request: const AdRequest(),
       rewardedAdLoadCallback: RewardedAdLoadCallback(
         onAdLoaded: (ad) {
+          StarterLog.i(
+            'Rewarded ad loaded',
+            tag: 'ADS',
+            values: {'UnitID': adUnitId},
+          );
           _rewardedAd = ad;
           _rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
             onAdDismissedFullScreenContent: (ad) {
+              StarterLog.d('Rewarded ad dismissed', tag: 'ADS');
               ad.dispose();
               _rewardedAd = null;
               // Preload next ad
@@ -167,6 +191,11 @@ class AdMobDataSource implements AdsRemoteDataSource {
               }
             },
             onAdFailedToShowFullScreenContent: (ad, error) {
+              StarterLog.e(
+                'Rewarded ad failed to show',
+                tag: 'ADS',
+                error: error,
+              );
               ad.dispose();
               _rewardedAd = null;
               _rewardedCompleter?.completeError(
@@ -196,6 +225,12 @@ class AdMobDataSource implements AdsRemoteDataSource {
           );
         },
         onAdFailedToLoad: (error) {
+          StarterLog.e(
+            'Rewarded ad failed to load',
+            tag: 'ADS',
+            error: error.message,
+            values: {'UnitID': adUnitId, 'Code': error.code},
+          );
           completer.complete(
             AdUnit(
               id: adUnitId,
@@ -253,9 +288,15 @@ class AdMobDataSource implements AdsRemoteDataSource {
       request: const AdRequest(),
       adLoadCallback: AppOpenAdLoadCallback(
         onAdLoaded: (ad) {
+          StarterLog.i(
+            'App Open ad loaded',
+            tag: 'ADS',
+            values: {'UnitID': adUnitId},
+          );
           _appOpenAd = ad;
           _appOpenAd!.fullScreenContentCallback = FullScreenContentCallback(
             onAdDismissedFullScreenContent: (ad) {
+              StarterLog.d('App Open ad dismissed', tag: 'ADS');
               ad.dispose();
               _appOpenAd = null;
               // Preload next ad
@@ -264,6 +305,11 @@ class AdMobDataSource implements AdsRemoteDataSource {
               }
             },
             onAdFailedToShowFullScreenContent: (ad, error) {
+              StarterLog.e(
+                'App Open ad failed to show',
+                tag: 'ADS',
+                error: error,
+              );
               ad.dispose();
               _appOpenAd = null;
             },
@@ -285,6 +331,12 @@ class AdMobDataSource implements AdsRemoteDataSource {
           );
         },
         onAdFailedToLoad: (error) {
+          StarterLog.e(
+            'App Open ad failed to load',
+            tag: 'ADS',
+            error: error.message,
+            values: {'UnitID': adUnitId, 'Code': error.code},
+          );
           completer.complete(
             AdUnit(
               id: adUnitId,

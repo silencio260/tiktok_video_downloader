@@ -107,7 +107,7 @@ class RetentionTracker extends ChangeNotifier {
     final daysSinceInstall = getDaysSinceInstall();
     if (daysSinceInstall >= 1 && daysSinceInstall <= 30) {
       if (hasReturnedOnDay(daysSinceInstall)) {
-        params['milestone_d$daysSinceInstall'] = true;
+        params['milestone_d$daysSinceInstall'] = 1;
       }
     }
 

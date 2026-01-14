@@ -81,6 +81,8 @@ Future<void> initializeStarterKit({
   );
   debugPrint('interstitial_ad_id: ${finalAdsConfig.interstitialAdUnitId}');
   debugPrint('rewarded_ad_id: ${finalAdsConfig.rewardedAdUnitId}');
+  debugPrint('native_ad_id: ${finalAdsConfig.nativeAdUnitId}');
+  debugPrint('app_open_ad_id: ${finalAdsConfig.appOpenAdUnitId}');
   debugPrint('-------------------------------------------');
 
   await _initializePostHog(
@@ -117,6 +119,9 @@ AdsConfig _getAdsConfigFromRemoteConfig(AdsConfig? baseConfig) {
       'rewarded_ad_id',
       baseConfig?.rewardedAdUnitId,
     ),
+    nativeAdUnitId: getRCString('native_ad_id', baseConfig?.nativeAdUnitId),
+    appOpenAdUnitId: getRCString('app_open_ad_id', baseConfig?.appOpenAdUnitId),
+    testDeviceIds: baseConfig?.testDeviceIds ?? const [],
     minInterstitialInterval: rc.getInt('min_insta_ad_interval'),
     minRewardedInterval: rc.getInt('min_rewarded_ad_interval'),
     minNativeInterval: rc.getInt('min_native_interval'),

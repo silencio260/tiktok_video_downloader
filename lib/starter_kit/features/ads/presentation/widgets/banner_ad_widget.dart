@@ -69,7 +69,12 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
           }
         },
         onAdFailedToLoad: (ad, error) {
-          debugPrint('BannerAdWidget: Failed to load ad: $error');
+          StarterLog.e(
+            'Banner Ad failed to load',
+            tag: 'ADS',
+            error: error.message,
+            values: {'UnitID': adUnitId, 'Code': error.code},
+          );
           ad.dispose();
         },
         onPaidEvent: (ad, valueMicros, precision, currencyCode) {

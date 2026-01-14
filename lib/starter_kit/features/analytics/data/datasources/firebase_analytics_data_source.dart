@@ -21,7 +21,7 @@ class FirebaseAnalyticsDataSource implements AnalyticsRemoteDataSource {
   @override
   Future<void> logEvent(AnalyticsEvent event) async {
     if (!_isInitialized) return;
-    final params = Map<String, Object>.from(event.parameters);
+    final params = _sanitizeParameters(event.parameters);
     params['platform'] = Platform.operatingSystem;
     await _analytics?.logEvent(name: event.name, parameters: params);
   }
@@ -30,19 +30,18 @@ class FirebaseAnalyticsDataSource implements AnalyticsRemoteDataSource {
   Future<void> logAdRevenue(AdRevenueEvent event) async {
     if (!_isInitialized) return;
     // Manual mapping to match Status Saver template's "special" keys
-    await _analytics?.logEvent(
-      name: 'ad_impression',
-      parameters: {
-        'ad_platform': event.adSource,
-        'ad_unit_id': event.adUnitId,
-        'ad_format': event.adFormat ?? 'unknown',
-        'value': event.value,
-        'valueMicros': event.valueMicros,
-        'currency': event.currency,
-        'platform': Platform.operatingSystem,
-        if (event.adNetwork != null) 'ad_network': event.adNetwork!,
-      },
-    );
+    final params = _sanitizeParameters({
+      'ad_platform': event.adSource,
+      'ad_unit_id': event.adUnitId,
+      'ad_format': event.adFormat ?? 'unknown',
+      'value': event.value,
+      'valueMicros': event.valueMicros,
+      'currency': event.currency,
+      'platform': Platform.operatingSystem,
+      if (event.adNetwork != null) 'ad_network': event.adNetwork!,
+    });
+
+    await _analytics?.logEvent(name: 'ad_impression', parameters: params);
   }
 
   @override
@@ -70,8 +69,7 @@ class FirebaseAnalyticsDataSource implements AnalyticsRemoteDataSource {
     Map<String, dynamic> parameters,
   ) async {
     if (!_isInitialized) return;
-    final params = parameters.cast<String, Object>();
-    final finalParams = Map<String, Object>.from(params);
+    final finalParams = _sanitizeParameters(parameters);
     finalParams['platform'] = Platform.operatingSystem;
     await _analytics?.logEvent(name: eventName, parameters: finalParams);
   }
@@ -82,8 +80,7 @@ class FirebaseAnalyticsDataSource implements AnalyticsRemoteDataSource {
     Map<String, dynamic> parameters,
   ) async {
     if (!_isInitialized) return;
-    final params = parameters.cast<String, Object>();
-    final finalParams = Map<String, Object>.from(params);
+    final finalParams = _sanitizeParameters(parameters);
     finalParams['platform'] = Platform.operatingSystem;
     await _analytics?.logEvent(name: eventName, parameters: finalParams);
   }
@@ -94,8 +91,7 @@ class FirebaseAnalyticsDataSource implements AnalyticsRemoteDataSource {
     Map<String, dynamic> parameters,
   ) async {
     if (!_isInitialized) return;
-    final params = parameters.cast<String, Object>();
-    final finalParams = Map<String, Object>.from(params);
+    final finalParams = _sanitizeParameters(parameters);
     finalParams['platform'] = Platform.operatingSystem;
     await _analytics?.logEvent(name: eventName, parameters: finalParams);
   }
@@ -117,5 +113,21 @@ class FirebaseAnalyticsDataSource implements AnalyticsRemoteDataSource {
     bool fatal = false,
   }) async {
     await FirebaseCrashlytics.instance.recordError(error, stack, fatal: fatal);
+  }
+
+  /// Sanitizes parameters for Firebase Analytics which only accepts String or num.
+  /// Converts booleans to ints (1/0).
+  Map<String, Object> _sanitizeParameters(Map<String, dynamic> parameters) {
+    final sanitized = <String, Object>{};
+    parameters.forEach((key, value) {
+      if (value is String || value is num) {
+        sanitized[key] = value;
+      } else if (value is bool) {
+        sanitized[key] = value ? 1 : 0;
+      } else {
+        sanitized[key] = value?.toString() ?? 'null';
+      }
+    });
+    return sanitized;
   }
 }
