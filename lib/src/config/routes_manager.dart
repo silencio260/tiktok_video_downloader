@@ -4,6 +4,7 @@ import 'package:tiktok_video_downloader/src/features/tiktok_downloader/presentat
 import '../features/splash/presentation/screens/splash_screen.dart';
 import '../features/tiktok_downloader/presentation/screens/downloader_screen.dart';
 import '../features/tiktok_downloader/presentation/screens/downloads_screen.dart';
+import '../features/tiktok_downloader/presentation/screens/settings_screen.dart';
 import 'package:tiktok_video_downloader/src/features/onboarding/presentation/screens/onboarding_screen.dart';
 
 class Routes {
@@ -12,6 +13,7 @@ class Routes {
   static const String downloads = "/downloads";
   static const String viewVideo = "/viewVideo";
   static const String onboarding = "/onboarding";
+  static const String settings = "/settings";
 }
 
 class AppRouter {
@@ -28,13 +30,16 @@ class AppRouter {
         return MaterialPageRoute(builder: (context) => const DownloadsScreen());
       case Routes.viewVideo:
         return MaterialPageRoute(
-          builder: (context) =>
-              VideoPlayerView(videoPath: routeSettings.arguments as String),
+          builder:
+              (context) =>
+                  VideoPlayerView(videoPath: routeSettings.arguments as String),
         );
       case Routes.onboarding:
         return MaterialPageRoute(
           builder: (context) => const OnboardingScreen(),
         );
+      case Routes.settings:
+        return MaterialPageRoute(builder: (context) => const SettingsScreen());
     }
     return null;
   }

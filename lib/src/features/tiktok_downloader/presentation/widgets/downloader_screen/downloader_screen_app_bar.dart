@@ -16,7 +16,7 @@ class DownloaderScreenAppBar extends StatelessWidget
       leading: IconButton(
         icon: const Icon(Icons.settings_outlined, color: AppColors.white),
         onPressed: () {
-          // Add settings logic
+          Navigator.of(context).pushNamed(Routes.settings);
         },
       ),
       title: Text(
