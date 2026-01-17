@@ -4,7 +4,7 @@ import 'package:tiktok_video_downloader/src/features/tiktok_downloader/presentat
 import '../features/splash/presentation/screens/splash_screen.dart';
 import '../features/tiktok_downloader/presentation/screens/downloader_screen.dart';
 import '../features/tiktok_downloader/presentation/screens/downloads_screen.dart';
-import '../features/tiktok_downloader/presentation/screens/settings_screen.dart';
+import '../features/settings/presentation/screens/settings_screen.dart';
 import 'package:tiktok_video_downloader/src/features/onboarding/presentation/screens/onboarding_screen.dart';
 
 class Routes {

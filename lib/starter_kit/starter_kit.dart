@@ -22,6 +22,8 @@ import 'features/onboarding/presentation/onboarding_view.dart';
 import 'features/services/services_injector.dart';
 import 'features/settings/domain/models/settings_models.dart';
 import 'features/settings/presentation/settings_view.dart';
+import 'features/navigation/domain/models/double_tap_config.dart';
+import 'features/navigation/presentation/widgets/double_tap_to_exit_widget.dart';
 import 'features/ads/presentation/widgets/banner_ad_widget.dart';
 import 'features/ads/presentation/widgets/native_ad_widget.dart';
 import 'features/analytics/presentation/widgets/posthog_wrapper.dart';
@@ -234,6 +236,31 @@ class StarterKit {
       captureLocalStorage: captureLocalStorage,
       captureApplicationLifecycleEvents: captureApplicationLifecycleEvents,
       child: child,
+    );
+  }
+
+  /// Build a Double Tap to Exit wrapper widget
+  /// 
+  /// Wraps a widget with double tap to exit functionality:
+  /// - First back tap: Shows an exit confirmation dialog
+  /// - Second back tap (within timeout): Exits the app
+  /// 
+  /// All aspects of the dialog and snackbar are customizable through [config].
+  static Widget doubleTapToExit({
+    required Widget child,
+    DoubleTapExitConfig? config,
+    bool debugLog = false,
+  }) {
+    if (debugLog) {
+      StarterLog.d(
+        'Building Double Tap to Exit Wrapper',
+        tag: 'UI',
+        debugLog: true,
+      );
+    }
+    return DoubleTapToExitWidget(
+      child: child,
+      config: config ?? const DoubleTapExitConfig(),
     );
   }
 }

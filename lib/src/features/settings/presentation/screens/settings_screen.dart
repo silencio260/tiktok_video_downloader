@@ -9,10 +9,10 @@ import 'package:tiktok_video_downloader/starter_kit/features/iap/presentation/bl
 import 'package:tiktok_video_downloader/starter_kit/features/services/gdpr/domain/repositories/gdpr_repository.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../../../starter_kit/features/services/app_rating/domain/repositories/app_rating_repository.dart';
-import '../../../../../starter_kit/features/services/feedback/domain/repositories/feedback_repository.dart';
-import '../../../../../starter_kit/features/settings/domain/models/settings_models.dart';
-import '../../../../../starter_kit/starter_kit.dart';
+import 'package:tiktok_video_downloader/starter_kit/features/services/app_rating/domain/repositories/app_rating_repository.dart';
+import 'package:tiktok_video_downloader/starter_kit/features/services/feedback/domain/repositories/feedback_repository.dart';
+import 'package:tiktok_video_downloader/starter_kit/features/settings/domain/models/settings_models.dart';
+import 'package:tiktok_video_downloader/starter_kit/starter_kit.dart';
 import '../../../../config/routes_manager.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -153,6 +153,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     iconColor: Colors.orange,
                     onTap: _resetGDPR,
                   ),
+                  SettingsTile(
+                    title: "Toggle Premium Status (Debug)",
+                    icon: Icons.diamond_outlined,
+                    iconColor: Colors.purpleAccent,
+                    onTap: () {
+                      StarterKit.iapBloc.add(const IapDebugTogglePremium());
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Toggled Premium Status")),
+                      );
+                    },
+                  ),
                 ],
               ),
 
@@ -198,12 +209,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
               decoration: const InputDecoration(
                 hintText: "Enter your feedback here...",
                 hintStyle: TextStyle(color: Colors.grey),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey),
+                filled: true,
+                fillColor: Color(0xFF2C2C2C), // Dark grey background
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.transparent),
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
                 ),
-                focusedBorder: UnderlineInputBorder(
+                focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: AppColors.white),
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
                 ),
+                contentPadding: EdgeInsets.all(16),
               ),
               maxLines: 3,
             ),

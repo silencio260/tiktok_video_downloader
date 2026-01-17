@@ -46,3 +46,8 @@ class IapPurchaseProduct extends IapEvent {
 class IapRestorePurchases extends IapEvent {
   const IapRestorePurchases();
 }
+
+/// Debug: Toggle premium status
+class IapDebugTogglePremium extends IapEvent {
+  const IapDebugTogglePremium();
+}

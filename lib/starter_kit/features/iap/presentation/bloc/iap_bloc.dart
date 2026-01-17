@@ -42,6 +42,32 @@ class IapBloc extends Bloc<IapEvent, IapState> {
     on<IapLoadProducts>(_onLoadProducts);
     on<IapPurchaseProduct>(_onPurchaseProduct);
     on<IapRestorePurchases>(_onRestorePurchases);
+    on<IapDebugTogglePremium>(_onDebugTogglePremium);
+  }
+
+  Future<void> _onDebugTogglePremium(
+    IapDebugTogglePremium event,
+    Emitter<IapState> emit,
+  ) async {
+    final newStatus =
+        _currentStatus.isPremium
+            ? const SubscriptionStatus.free()
+            : SubscriptionStatus(
+              isPremium: true,
+              activeEntitlementId: 'debug_entitlement',
+              activeProductId: 'debug_product',
+              expirationDate: DateTime.now().add(const Duration(days: 1)),
+              willRenew: true,
+            );
+
+    _currentStatus = newStatus;
+    SubscriptionManager.instance.updateStatus(newStatus);
+    emit(IapInitialized(status: newStatus));
+
+    StarterLog.i(
+      'Debug: Premium Toggled to ${newStatus.isPremium}',
+      tag: 'IAP',
+    );
   }
 
   Future<void> _onRefreshStatus(
