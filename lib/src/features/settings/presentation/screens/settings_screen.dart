@@ -24,17 +24,43 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   String _version = '';
+  bool _premiumDebugToggle = false;
+
+  static const String _premiumDebugKey = 'premium_debug_enabled';
 
   @override
   void initState() {
     super.initState();
     _loadVersion();
+    _loadPremiumDebugState();
   }
 
   Future<void> _loadVersion() async {
     final packageInfo = await PackageInfo.fromPlatform();
     setState(() {
       _version = packageInfo.version;
+    });
+  }
+
+  Future<void> _loadPremiumDebugState() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isEnabled = prefs.getBool(_premiumDebugKey) ?? false;
+    setState(() {
+      _premiumDebugToggle = isEnabled;
+    });
+    // Sync with SubscriptionManager on load
+    StarterKit.subscriptionManager.setDebugOverride(isEnabled);
+  }
+
+  Future<void> _togglePremiumDebug(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_premiumDebugKey, value);
+    // Sync with SubscriptionManager
+    StarterKit.subscriptionManager.setDebugOverride(value);
+    // Dispatch event to IapBloc
+    StarterKit.iapBloc.add(const IapDebugTogglePremium());
+    setState(() {
+      _premiumDebugToggle = value;
     });
   }
 
@@ -154,15 +180,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     onTap: _resetGDPR,
                   ),
                   SettingsTile(
-                    title: "Toggle Premium Status (Debug)",
+                    title: "Premium Status (Debug)",
+                    subtitle: "Toggle premium status for testing",
                     icon: Icons.diamond_outlined,
                     iconColor: Colors.purpleAccent,
-                    onTap: () {
-                      StarterKit.iapBloc.add(const IapDebugTogglePremium());
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Toggled Premium Status")),
-                      );
-                    },
+                    trailing: Switch(
+                      value: _premiumDebugToggle,
+                      onChanged: _togglePremiumDebug,
+                      activeColor: Colors.purpleAccent,
+                    ),
                   ),
                 ],
               ),
