@@ -12,6 +12,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:tiktok_video_downloader/starter_kit/features/services/app_rating/domain/repositories/app_rating_repository.dart';
 import 'package:tiktok_video_downloader/starter_kit/features/services/feedback/domain/repositories/feedback_repository.dart';
 import 'package:tiktok_video_downloader/starter_kit/features/settings/domain/models/settings_models.dart';
+import 'package:tiktok_video_downloader/starter_kit/features/ads/presentation/bloc/ads_bloc.dart';
 import 'package:tiktok_video_downloader/starter_kit/starter_kit.dart';
 import '../../../../config/routes_manager.dart';
 
@@ -44,7 +45,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _loadPremiumDebugState() async {
     final prefs = await SharedPreferences.getInstance();
-    final isEnabled = prefs.getBool(_premiumDebugKey) ?? false;
+    
+    // Check if user is actually premium (not just debug override)
+    final isActuallyPremium = StarterKit.subscriptionManager.status.isPremium;
+    
+    // Check if ads were shown (stored flag)
+    final adsWereShown = prefs.getBool('ads_were_shown') ?? false;
+    
+    // Enable toggle if user is premium OR if ads were shown
+    bool shouldEnable = isActuallyPremium || adsWereShown;
+    
+    // Use saved preference if it exists, otherwise use calculated value
+    final savedPreference = prefs.getBool(_premiumDebugKey);
+    final isEnabled = savedPreference ?? shouldEnable;
+    
+    // If calculated value says it should be enabled, save it
+    if (shouldEnable && savedPreference != shouldEnable) {
+      await prefs.setBool(_premiumDebugKey, true);
+    }
+    
     setState(() {
       _premiumDebugToggle = isEnabled;
     });
@@ -84,14 +103,48 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  Future<void> _onAdShown() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('ads_were_shown', true);
+    
+    // Auto-enable premium debug toggle if not already enabled
+    if (!_premiumDebugToggle) {
+      await _togglePremiumDebug(true);
+    }
+  }
+
+  Future<void> _checkAndUpdatePremiumToggle() async {
+    // Check if user is actually premium (not just debug override)
+    final isActuallyPremium = StarterKit.subscriptionManager.status.isPremium;
+    
+    // If user is premium and toggle is off, enable it
+    if (isActuallyPremium && !_premiumDebugToggle) {
+      await _togglePremiumDebug(true);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<IapBloc, IapState>(
-      bloc: StarterKit.iapBloc,
-      builder: (context, iapState) {
-        final isPremium = StarterKit.iapBloc.isPremium;
+    return BlocListener<AdsBloc, AdsState>(
+      bloc: StarterKit.adsBloc,
+      listener: (context, adsState) {
+        // When an ad is shown successfully, enable the premium debug toggle
+        if (adsState is AdsShowSuccess) {
+          _onAdShown();
+        }
+      },
+      child: BlocListener<IapBloc, IapState>(
+        bloc: StarterKit.iapBloc,
+        listener: (context, iapState) {
+          // When premium status changes, check and update toggle
+          _checkAndUpdatePremiumToggle();
+        },
+        child: BlocBuilder<IapBloc, IapState>(
+          bloc: StarterKit.iapBloc,
+          builder: (context, iapState) {
+            final isPremium = StarterKit.iapBloc.isPremium;
 
-        return StarterKit.settings(
+          return StarterKit.settings(
           title: "Settings",
           backgroundColor: AppColors.primaryColor,
           sections: [
@@ -207,7 +260,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ],
         );
-      },
+          },
+        ),
+      ),
     );
   }
 
