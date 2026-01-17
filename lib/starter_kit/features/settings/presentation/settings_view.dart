@@ -52,7 +52,10 @@ class SettingsView extends StatelessWidget {
                     section.title!.toUpperCase(),
                     style: TextStyle(
                       color:
-                          sectionHeaderColor ?? Theme.of(context).primaryColor,
+                          sectionHeaderColor ??
+                          Theme.of(
+                            context,
+                          ).colorScheme.primary, // Updated default
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
                     ),
@@ -92,13 +95,15 @@ class SettingsView extends StatelessWidget {
                 child: Text(
                   section.title!,
                   style: TextStyle(
-                    color: sectionHeaderColor ?? Theme.of(context).primaryColor,
+                    color:
+                        sectionHeaderColor ??
+                        Colors.white, // Default to white for headers
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
             for (final tile in section.tiles) _buildTile(context, tile),
-            const Divider(),
+            const Divider(color: Colors.white24), // Subtle white divider
           ],
         ],
       );
@@ -110,8 +115,21 @@ class SettingsView extends StatelessWidget {
       leading:
           tile.customLeading ??
           (tile.icon != null ? Icon(tile.icon, color: tile.iconColor) : null),
-      title: Text(tile.title),
-      subtitle: tile.subtitle != null ? Text(tile.subtitle!) : null,
+      title: Text(
+        tile.title,
+        style: const TextStyle(
+          color: Colors.white,
+        ), // Force white text for titles
+      ),
+      subtitle:
+          tile.subtitle != null
+              ? Text(
+                tile.subtitle!,
+                style: const TextStyle(
+                  color: Colors.grey,
+                ), // Grey text for subtitles
+              )
+              : null,
       trailing:
           tile.trailing ?? const Icon(Icons.chevron_right, color: Colors.grey),
       onTap: tile.onTap,

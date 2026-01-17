@@ -12,6 +12,7 @@ import 'starter_kit/features/analytics/data/datasources/posthog_remote_data_sour
 import 'starter_kit/features/analytics/presentation/bloc/analytics_event.dart';
 import 'starter_kit/features/services/push_notifications/domain/repositories/push_notifications_repository.dart';
 import 'starter_kit/features/services/remote_config/domain/repositories/remote_config_repository.dart';
+import 'starter_kit/features/services/gdpr/domain/repositories/gdpr_repository.dart';
 import 'starter_kit/features/ads/presentation/bloc/ads_bloc.dart';
 import 'starter_kit/features/analytics/domain/utils/analytics_names.dart';
 
@@ -97,6 +98,10 @@ Future<void> initializeStarterKit({
 
   await _initializeAds(adsConfig: finalAdsConfig);
   await _initializeOneSignal(oneSignalAppId: oneSignalAppId);
+
+  // Request GDPR Consent
+  final gdprRepo = StarterKit.sl<GdprRepository>();
+  await gdprRepo.requestConsent();
 }
 
 /// Helper to build AdsConfig from Remote Config with fallback to provided config
