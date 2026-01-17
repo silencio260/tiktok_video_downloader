@@ -31,7 +31,7 @@ class DoubleTapToExitWidget extends StatelessWidget {
           config.dialogTitle,
           style: config.titleTextStyle ??
               TextStyle(
-                color: config.titleColor ?? Colors.black,
+                color: config.titleColor ?? Colors.white,
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
               ),
@@ -40,7 +40,7 @@ class DoubleTapToExitWidget extends StatelessWidget {
           config.dialogContent,
           style: config.contentTextStyle ??
               TextStyle(
-                color: config.contentColor ?? Colors.black87,
+                color: config.contentColor ?? Colors.white,
                 fontSize: 16,
               ),
         ),
@@ -48,14 +48,14 @@ class DoubleTapToExitWidget extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.of(context).pop(false), // Stay in app
             style: TextButton.styleFrom(
-              foregroundColor: config.cancelButtonTextColor ?? Colors.grey,
+              foregroundColor: config.cancelButtonTextColor ?? Colors.white,
               backgroundColor: config.cancelButtonColor,
             ),
             child: Text(
               config.cancelButtonText,
               style: config.cancelButtonTextStyle ??
                   TextStyle(
-                    color: config.cancelButtonTextColor ?? Colors.grey,
+                    color: config.cancelButtonTextColor ?? Colors.white,
                   ),
             ),
           ),
@@ -65,14 +65,14 @@ class DoubleTapToExitWidget extends StatelessWidget {
               SystemChannels.platform.invokeMethod('SystemNavigator.pop'); // Exit app
             },
             style: TextButton.styleFrom(
-              foregroundColor: config.confirmButtonTextColor ?? Colors.blue,
+              foregroundColor: config.confirmButtonTextColor ?? Colors.white,
               backgroundColor: config.confirmButtonColor,
             ),
             child: Text(
               config.confirmButtonText,
               style: config.confirmButtonTextStyle ??
                   TextStyle(
-                    color: config.confirmButtonTextColor ?? Colors.blue,
+                    color: config.confirmButtonTextColor ?? Colors.white,
                     fontWeight: FontWeight.bold,
                   ),
             ),
