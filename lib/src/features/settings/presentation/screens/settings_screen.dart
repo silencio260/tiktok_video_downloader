@@ -45,25 +45,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _loadPremiumDebugState() async {
     final prefs = await SharedPreferences.getInstance();
-    
+
     // Check if user is actually premium (not just debug override)
     final isActuallyPremium = StarterKit.subscriptionManager.status.isPremium;
-    
+
     // Check if ads were shown (stored flag)
     final adsWereShown = prefs.getBool('ads_were_shown') ?? false;
-    
+
     // Enable toggle if user is premium OR if ads were shown
     bool shouldEnable = isActuallyPremium || adsWereShown;
-    
+
     // Use saved preference if it exists, otherwise use calculated value
     final savedPreference = prefs.getBool(_premiumDebugKey);
     final isEnabled = savedPreference ?? shouldEnable;
-    
+
     // If calculated value says it should be enabled, save it
     if (shouldEnable && savedPreference != shouldEnable) {
       await prefs.setBool(_premiumDebugKey, true);
     }
-    
+
     setState(() {
       _premiumDebugToggle = isEnabled;
     });
@@ -106,7 +106,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _onAdShown() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('ads_were_shown', true);
-    
+
     // Auto-enable premium debug toggle if not already enabled
     if (!_premiumDebugToggle) {
       await _togglePremiumDebug(true);
@@ -116,7 +116,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _checkAndUpdatePremiumToggle() async {
     // Check if user is actually premium (not just debug override)
     final isActuallyPremium = StarterKit.subscriptionManager.status.isPremium;
-    
+
     // If user is premium and toggle is off, enable it
     if (isActuallyPremium && !_premiumDebugToggle) {
       await _togglePremiumDebug(true);
@@ -144,122 +144,124 @@ class _SettingsScreenState extends State<SettingsScreen> {
           builder: (context, iapState) {
             final isPremium = StarterKit.iapBloc.isPremium;
 
-          return StarterKit.settings(
-          title: "Settings",
-          backgroundColor: AppColors.primaryColor,
-          sections: [
-            // --- User / Premium Section ---
-            SettingsSection(
-              title: "Account",
-              tiles: [
-                if (!isPremium)
-                  SettingsTile(
-                    title: "Upgrade to Premium",
-                    subtitle: "Remove ads & unlock all features",
-                    icon: Icons.workspace_premium,
-                    iconColor: Colors.amber,
-                    onTap: () {
-                      // Navigate to Paywall or trigger purchase flow
-                      // TODO: Implement Paywall navigation
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Paywall Coming Soon')),
-                      );
-                    },
-                  )
-                else
-                  SettingsTile(
-                    title: "Premium Active",
-                    subtitle: "You are a premium user",
-                    icon: Icons.verified,
-                    iconColor: Colors.green,
-                    onTap: () {}, // No action needed
-                  ),
-              ],
-            ),
+            return StarterKit.settings(
+              title: "Settings",
+              backgroundColor: AppColors.primaryColor,
+              sections: [
+                // --- User / Premium Section ---
+                SettingsSection(
+                  title: "Account",
+                  tiles: [
+                    if (!isPremium)
+                      SettingsTile(
+                        title: "Upgrade to Premium",
+                        subtitle: "Remove ads & unlock all features",
+                        icon: Icons.workspace_premium,
+                        iconColor: Colors.amber,
+                        onTap: () {
+                          // Navigate to Paywall or trigger purchase flow
+                          // TODO: Implement Paywall navigation
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Paywall Coming Soon'),
+                            ),
+                          );
+                        },
+                      )
+                    else
+                      SettingsTile(
+                        title: "Premium Active",
+                        subtitle: "You are a premium user",
+                        icon: Icons.verified,
+                        iconColor: Colors.green,
+                        onTap: () {}, // No action needed
+                      ),
+                  ],
+                ),
 
-            // --- General Section ---
-            SettingsSection(
-              title: "General",
-              tiles: [
-                SettingsTile(
-                  title: "Privacy Policy",
-                  icon: Icons.privacy_tip_outlined,
-                  iconColor: AppColors.white,
-                  onTap: () => _launchUrl('https://www.google.com'),
-                ),
-                SettingsTile(
-                  title: "Share App",
-                  icon: Icons.share_outlined,
-                  iconColor: AppColors.white,
-                  onTap: () {
-                    Share.share(
-                      'Check out this amazing TikTok Video Downloader!',
-                    );
-                  },
-                ),
-                SettingsTile(
-                  title: "Rate Us",
-                  icon: Icons.star_border,
-                  iconColor: AppColors.white,
-                  onTap: () {
-                    final ratingRepo = StarterKit.sl<AppRatingRepository>();
-                    ratingRepo.openStoreListing();
-                  },
-                ),
-                SettingsTile(
-                  title: "Feedback",
-                  icon: Icons.chat_bubble_outline,
-                  iconColor: AppColors.white,
-                  onTap: () => _showFeedbackDialog(context),
-                ),
-              ],
-            ),
-
-            // --- Developer Section (Debug Only) ---
-            if (kDebugMode)
-              SettingsSection(
-                title: "Developer Options",
-                tiles: [
-                  SettingsTile(
-                    title: "Reset Onboarding",
-                    icon: Icons.restart_alt,
-                    iconColor: Colors.orange,
-                    onTap: _resetOnboarding,
-                  ),
-                  SettingsTile(
-                    title: "Reset GDPR Consent",
-                    icon: Icons.cookie_outlined,
-                    iconColor: Colors.orange,
-                    onTap: _resetGDPR,
-                  ),
-                  SettingsTile(
-                    title: "Premium Status (Debug)",
-                    subtitle: "Toggle premium status for testing",
-                    icon: Icons.diamond_outlined,
-                    iconColor: Colors.purpleAccent,
-                    trailing: Switch(
-                      value: _premiumDebugToggle,
-                      onChanged: _togglePremiumDebug,
-                      activeColor: Colors.purpleAccent,
+                // --- General Section ---
+                SettingsSection(
+                  title: "General",
+                  tiles: [
+                    SettingsTile(
+                      title: "Privacy Policy",
+                      icon: Icons.privacy_tip_outlined,
+                      iconColor: AppColors.white,
+                      onTap: () => _launchUrl('https://www.google.com'),
                     ),
-                  ),
-                ],
-              ),
+                    SettingsTile(
+                      title: "Share App",
+                      icon: Icons.share_outlined,
+                      iconColor: AppColors.white,
+                      onTap: () {
+                        Share.share(
+                          'Check out this amazing TikTok Video Downloader!',
+                        );
+                      },
+                    ),
+                    SettingsTile(
+                      title: "Rate Us",
+                      icon: Icons.star_border,
+                      iconColor: AppColors.white,
+                      onTap: () {
+                        final ratingRepo = StarterKit.sl<AppRatingRepository>();
+                        ratingRepo.openStoreListing();
+                      },
+                    ),
+                    SettingsTile(
+                      title: "Feedback",
+                      icon: Icons.chat_bubble_outline,
+                      iconColor: AppColors.white,
+                      onTap: () => _showFeedbackDialog(context),
+                    ),
+                  ],
+                ),
 
-            // --- About ---
-            SettingsSection(
-              title: "About",
-              tiles: [
-                SettingsTile(
-                  title: "Version",
-                  subtitle: _version,
-                  icon: Icons.info_outline,
-                  iconColor: AppColors.white,
+                // --- Developer Section (Debug Only) ---
+                if (kDebugMode)
+                  SettingsSection(
+                    title: "Developer Options",
+                    tiles: [
+                      SettingsTile(
+                        title: "Reset Onboarding",
+                        icon: Icons.restart_alt,
+                        iconColor: Colors.orange,
+                        onTap: _resetOnboarding,
+                      ),
+                      SettingsTile(
+                        title: "Reset GDPR Consent",
+                        icon: Icons.cookie_outlined,
+                        iconColor: Colors.orange,
+                        onTap: _resetGDPR,
+                      ),
+                      SettingsTile(
+                        title: "Premium Status (Debug)",
+                        subtitle: "Toggle premium status for testing",
+                        icon: Icons.diamond_outlined,
+                        iconColor: Colors.purpleAccent,
+                        trailing: Switch(
+                          value: _premiumDebugToggle,
+                          onChanged: _togglePremiumDebug,
+                          activeColor: Colors.purpleAccent,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                // --- About ---
+                SettingsSection(
+                  title: "About",
+                  tiles: [
+                    SettingsTile(
+                      title: "Version",
+                      subtitle: _version,
+                      icon: Icons.info_outline,
+                      iconColor: AppColors.white,
+                    ),
+                  ],
                 ),
               ],
-            ),
-          ],
-        );
+            );
           },
         ),
       ),
